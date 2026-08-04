@@ -1,0 +1,28 @@
+name: relay_flutter
+description: Official Relay Delivery Platform Mobile SDK - Real-time WebSocket client for Flutter applications (iOS, Android, Web, Desktop)
+version: 1.3.0
+homepage: https://sendrelay.com.ng
+repository: https://github.com/SendRelay/relay-sdk-flutter.git
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.10.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  web_socket_channel: ^3.0.3    # WebSocket client
+  logging: ^1.2.0               # Logging utilities
+  meta: ^1.9.0                  # Annotations (@immutable, etc.)
+  shared_preferences: ^2.5.3    # Persistent SDK device identifier
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  test: ^1.24.0                 # Unit testing
+  mockito: ^5.4.0               # Mocking for tests
+  build_runner: ^2.4.0          # Code generation
+  flutter_lints: ^6.0.0         # Linting
+
+flutter:
+  # No assets or plugin configuration needed
