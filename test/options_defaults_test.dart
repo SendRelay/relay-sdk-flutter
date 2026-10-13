@@ -3,12 +3,12 @@ import 'package:relay_flutter/src/models/options.dart';
 
 void main() {
   group('RelayRealtimeClientOptions defaults', () {
-    test('uses ws.sendrelay.com.ng as default websocket endpoint', () {
+    test('uses the api.sendrelay.com.ng realtime endpoint by default', () {
       final options = RelayRealtimeClientOptions(
         getToken: (_) async => 'token',
       );
 
-      expect(options.url, equals('wss://ws.sendrelay.com.ng/v1'));
+      expect(options.url, equals('https://api.sendrelay.com.ng/v1/realtime/ws'));
     });
 
     test('keeps deviceId null when not provided', () {

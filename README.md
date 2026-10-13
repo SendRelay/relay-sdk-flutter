@@ -515,7 +515,7 @@ RelayRealtimeClient({
 ```
 
 Notes:
-- `url` defaults to `wss://ws.sendrelay.com.ng/v1`
+- `url` defaults to `wss://api.sendrelay.com.ng/v1/realtime/ws`
 - `deviceId` is optional. If omitted, the SDK generates and persists one locally.
 
 #### Methods

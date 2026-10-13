@@ -34,6 +34,46 @@ void main() {
       expect(event.currentStageIndex, equals(0));
     });
 
+    // Frames exactly as the server's task room publishes them (no envelope).
+    test('parses task frames as published by the server', () async {
+      final client = RelayRealtimeClient(
+        getToken: (_) async => 'token',
+      );
+
+      final cancelledFuture = client.onTaskCancelled.first;
+      final completedFuture = client.onTaskCompleted.first;
+
+      client.handleIncomingMessageForTest({
+        'type': 'TASK_CANCELLED',
+        'taskId': 'task-1',
+        'developerId': 'dev-1',
+        'riderId': null,
+        'status': 'CANCELLED',
+        'cancelledAt': '2026-10-12T10:00:00.000Z',
+        'cancelledBy': 'DEVELOPER',
+        'reason': 'Customer request',
+      });
+      client.handleIncomingMessageForTest({
+        'type': 'TASK_COMPLETED',
+        'taskId': 'task-2',
+        'developerId': 'dev-1',
+        'riderId': 'rider-1',
+        'status': 'COMPLETED',
+        'completedAt': '2026-10-12T11:00:00.000Z',
+        'deliveryFee': 250000,
+        'paymentStatus': 'PENDING',
+      });
+
+      final cancelled = await cancelledFuture;
+      expect(cancelled.developerId, equals('dev-1'));
+      expect(cancelled.riderId, isNull);
+      expect(cancelled.reason, equals('Customer request'));
+
+      final completed = await completedFuture;
+      expect(completed.developerId, equals('dev-1'));
+      expect(completed.deliveryFee, equals(250000));
+    });
+
     test('parses NEW_TASK_OFFER with nested task payload', () async {
       final client = RelayRealtimeClient(
         getToken: (_) async => 'token',

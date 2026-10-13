@@ -77,7 +77,7 @@ class RelayRealtimeClientOptions {
   /// ```
   final Future<String> Function(List<String> taskIds) getToken;
 
-  /// WebSocket URL (default: wss://ws.sendrelay.com.ng/v1)
+  /// WebSocket URL (default: https://api.sendrelay.com.ng/v1/realtime/ws, connected as wss)
   final String url;
 
   /// Device identifier.
