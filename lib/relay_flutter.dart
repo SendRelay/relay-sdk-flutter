@@ -34,7 +34,7 @@
 ///
 /// ```yaml
 /// dependencies:
-///   relay_flutter: ^1.0.0
+///   relay_flutter: ^1.4.0
 /// ```
 ///
 /// ## Quick Start
