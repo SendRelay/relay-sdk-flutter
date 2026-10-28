@@ -62,6 +62,7 @@ void main() {
         'completedAt': '2026-10-12T11:00:00.000Z',
         'deliveryFee': 250000,
         'paymentStatus': 'PENDING',
+        'completionCodeVerified': true,
       });
 
       final cancelled = await cancelledFuture;
@@ -72,6 +73,7 @@ void main() {
       final completed = await completedFuture;
       expect(completed.developerId, equals('dev-1'));
       expect(completed.deliveryFee, equals(250000));
+      expect(completed.completionCodeVerified, isTrue);
     });
 
     test('parses NEW_TASK_OFFER with nested task payload', () async {

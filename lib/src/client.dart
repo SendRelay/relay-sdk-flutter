@@ -572,6 +572,7 @@ class RelayRealtimeClient {
       deliveryFee: _asInt(data['deliveryFee']),
       paymentStatus:
           _parseOptionalPaymentStatus(data['paymentStatus'] as String?),
+      completionCodeVerified: data['completionCodeVerified'] as bool?,
     );
     _eventsController.add(event);
   }

@@ -413,6 +413,10 @@ class TaskCompletedEvent extends RelayEvent {
   /// Payment status after completion
   final PaymentStatus? paymentStatus;
 
+  /// True when the task had a completion code and the rider entered it;
+  /// null for tasks created without one.
+  final bool? completionCodeVerified;
+
   /// Create task completed event
   TaskCompletedEvent({
     required this.taskId,
@@ -422,6 +426,7 @@ class TaskCompletedEvent extends RelayEvent {
     required this.completedAt,
     required this.deliveryFee,
     this.paymentStatus,
+    this.completionCodeVerified,
     super.timestamp,
   });
 

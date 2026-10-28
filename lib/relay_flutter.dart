@@ -293,6 +293,14 @@ export 'src/models/events.dart'
         ConnectionErrorEvent,
         ConnectionReconnectingEvent,
         TokenExpiringEvent;
+// Rider presence map models
+export 'src/models/presence.dart'
+    show
+        PresenceMap,
+        PresenceCell,
+        PresencePoint,
+        PresenceResolution,
+        PresenceDensity;
 // Configuration
 export 'src/models/options.dart'
     show RelayRealtimeClientOptions, ReconnectConfig, HeartbeatConfig;
