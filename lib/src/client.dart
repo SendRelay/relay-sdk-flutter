@@ -175,7 +175,7 @@ class RelayRealtimeClient {
   /// - [getToken]: Callback to fetch WebSocket token from your backend
   ///
   /// Optional parameters:
-  /// - [url]: WebSocket URL (default: wss://ws.sendrelay.com.ng/v1)
+  /// - [url]: WebSocket URL (default: https://api.sendrelay.com.ng/v1/realtime/ws, connected as wss)
   /// - [deviceId]: Optional device identifier (auto-generated if omitted)
   /// - [autoRefresh]: Auto-refresh tokens before expiration (default: true)
   /// - [tokenExpirationWarning]: Token refresh warning threshold (default: 5 minutes)

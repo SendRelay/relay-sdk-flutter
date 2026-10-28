@@ -6,9 +6,11 @@
 
 Official Flutter SDK for the [Relay](https://sendrelay.com.ng) delivery platform. This is a **client-side mobile SDK** designed for Flutter applications.
 
-> **ℹ️ Client-Side SDK:** This SDK uses WebSocket tokens (not API keys) for secure client authentication. Tokens must be provisioned by your backend using [@relay-sdk/sdk-node](https://github.com/SendRelay/relay-sdk-node) (Server SDK).
+> **ℹ️ Client-Side SDK:** This SDK uses WebSocket tokens (not API keys) for secure client authentication. Tokens must be provisioned by your backend using [@relay-sdk/sdk-node](https://www.npmjs.com/package/@relay-sdk/sdk-node) (Server SDK).
 
 **Platform Support:** iOS • Android • Web • macOS • Windows • Linux
+
+📖 **Full documentation:** [Live tracking guide](https://docs.sendrelay.com.ng/tracking) · [SDK reference](https://docs.sendrelay.com.ng/sdks/flutter-sdk) · [Recipes](https://docs.sendrelay.com.ng/sdks/flutter-sdk/examples)
 
 ## Features
 
@@ -73,7 +75,7 @@ const { token } = await relay.auth.createWebSocketToken({
 ### Server-Side Alternative
 
 For server-side task creation and management:
-- **Node.js backend:** Use [@relay-sdk/sdk-node](https://github.com/SendRelay/relay-sdk-node) - REST API client with full access
+- **Node.js backend:** Use [@relay-sdk/sdk-node](https://www.npmjs.com/package/@relay-sdk/sdk-node) - REST API client with full access
 
 ### Web Alternative
 
@@ -150,6 +152,8 @@ void dispose() {
 
 The SDK requires a backend endpoint to fetch WebSocket tokens. This ensures your API keys never leave your backend.
 
+Relay checks that a task belongs to **your account**. Only your backend knows which of **your users** may see it, so check that before minting.
+
 ### Example Backend (Node.js/Express)
 
 ```javascript
@@ -164,33 +168,47 @@ const relay = new RelayClient({
 });
 
 app.post('/api/relay/token', authenticateUser, async (req, res) => {
-  const { taskIds } = req.body;
+  const taskIds = (req.body?.taskIds ?? []).slice(0, 20);
 
-  // Fetch token from Relay API
-  const { token } = await relay.auth.createWebSocketToken({
-    scope: taskIds.map((id) => `task:${id}`),
-    expiresIn: 3600, // 1 hour
+  // Only tasks on orders this user owns, looked up from YOUR database
+  const owned = await db.orders.findMany({ customerId: req.user.id, relayTaskId: { in: taskIds } });
+  if (taskIds.length === 0 || owned.length !== new Set(taskIds).size) {
+    return res.status(403).json({ error: 'Tracking access denied' });
+  }
+
+  const { token, expiresAt } = await relay.auth.createWebSocketToken({
+    scope: owned.map((o) => `task:${o.relayTaskId}`),
+    expiresIn: 900, // keep longer than tokenExpirationWarning (5 min default)
   });
 
-  res.json({ token });
+  res.set('Cache-Control', 'no-store').json({ token, expiresAt });
 });
 ```
 
 ### Example Backend (Python/FastAPI)
 
-```python
-from relay_sdk import RelayClient
-from fastapi import FastAPI, Depends
+There's no Python SDK; call the API directly:
 
-relay = RelayClient(api_key=os.getenv("RELAY_API_KEY"))
+```python
+import os, httpx
+from fastapi import Depends, FastAPI, HTTPException
+
+app = FastAPI()
 
 @app.post("/api/relay/token")
 async def create_token(task_ids: list[str], user=Depends(get_current_user)):
-    token_response = relay.auth.create_websocket_token(
-        scope=[f"task:{task_id}" for task_id in task_ids],
-        expires_in=3600,
-    )
-    return {"token": token_response.token}
+    owned = await orders.find_owned(user.id, task_ids)  # your own lookup
+    if not task_ids or len(owned) != len(set(task_ids)):
+        raise HTTPException(403, "Tracking access denied")
+
+    async with httpx.AsyncClient() as client:
+        r = await client.post(
+            "https://api.sendrelay.com.ng/v1/auth/websocket-token",
+            headers={"X-Relay-Key": os.environ["RELAY_API_KEY"]},
+            json={"scope": [f"task:{o.relay_task_id}" for o in owned], "expiresIn": 900},
+        )
+    r.raise_for_status()
+    return {"token": r.json()["token"]}
 ```
 
 ## Usage
@@ -464,12 +482,14 @@ relay.disconnect();
 | `TaskOfferedEvent` | Task offered to riders |
 | `TaskAssignedEvent` | Task assigned to specific rider |
 | `TaskInProgressEvent` | Rider started task |
-| `TaskCompletedEvent` | Task completed successfully |
+| `TaskCompletedEvent` | Task completed successfully. `completionCodeVerified` is `true` for tasks created with a completion code |
 | `TaskFailedEvent` | Task failed (timeout, rider issue) |
-| `TaskCancelledEvent` | Task cancelled by developer |
+| `TaskCancelledEvent` | Task cancelled by you or the rider |
 | `StageCompletedEvent` | Task stage (pickup/dropoff) completed |
 
 ### Payment Events
+
+> Payment events (and `TaskCreatedEvent`) are delivered to your server as webhooks only; customer apps don't receive them over realtime.
 
 | Event | Description |
 |-------|-------------|
@@ -494,6 +514,20 @@ relay.disconnect();
 | `ConnectionErrorEvent` | Connection error occurred |
 | `ConnectionReconnectingEvent` | Reconnection in progress |
 | `TokenExpiringEvent` | Token about to expire |
+
+## Presence Map Models
+
+`PresenceMap.fromJson` parses a presence response that your backend fetched from `GET /v1/sdk/presence` (it needs your API key):
+
+```dart
+final res = await http.get(Uri.parse('https://api.yourapp.com/api/relay/presence?lat=6.52&lng=3.38'));
+final presence = PresenceMap.fromJson(jsonDecode(res.body));
+for (final cell in presence.cells) {
+  print('${cell.cellId} ${cell.density} ${cell.vehicleTypes}'); // draw cell.boundary as a polygon
+}
+```
+
+See [Rider presence map](https://docs.sendrelay.com.ng/riders/presence-map).
 
 ## API Reference
 
