@@ -286,6 +286,7 @@ export 'src/models/events.dart'
         PaymentDisputeResolvedEvent,
         // Real-time events
         RiderLocationUpdateEvent,
+        RiderRouteEta,
         NewTaskOfferEvent,
         // Connection events
         ConnectionOpenEvent,

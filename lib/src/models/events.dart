@@ -801,16 +801,59 @@ class RiderLocationUpdateEvent extends RelayEvent {
   /// Location
   final Location location;
 
+  /// The rider's ETA to the stop they are heading to, from their navigation
+  /// route and live traffic. Null when the rider's app hasn't reported one.
+  final RiderRouteEta? eta;
+
   /// Create rider location update event
   RiderLocationUpdateEvent({
     required this.riderId,
     required this.taskId,
     required this.location,
+    this.eta,
     super.timestamp,
   });
 
   @override
   String toString() => 'RiderLocationUpdateEvent(riderId: $riderId, taskId: $taskId)';
+}
+
+/// The rider's remaining time and road distance to a stop, as of a location update
+@immutable
+class RiderRouteEta {
+  /// Index of the stage the rider is heading to
+  final int stageIndex;
+
+  /// Driving time left
+  final Duration remaining;
+
+  /// Road distance left, in metres
+  final int meters;
+
+  /// Create a route ETA
+  const RiderRouteEta({
+    required this.stageIndex,
+    required this.remaining,
+    required this.meters,
+  });
+
+  /// Parse the `eta` of a location update, or null if it is missing or malformed
+  static RiderRouteEta? tryParse(Object? json) {
+    if (json is! Map) return null;
+    final stageIndex = json['stageIndex'];
+    final seconds = json['seconds'];
+    final meters = json['meters'];
+    if (stageIndex is! num || seconds is! num || meters is! num) return null;
+    return RiderRouteEta(
+      stageIndex: stageIndex.toInt(),
+      remaining: Duration(seconds: seconds.round()),
+      meters: meters.round(),
+    );
+  }
+
+  @override
+  String toString() =>
+      'RiderRouteEta(stageIndex: $stageIndex, remaining: $remaining, meters: $meters)';
 }
 
 /// New task offer event

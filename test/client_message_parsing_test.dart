@@ -76,6 +76,35 @@ void main() {
       expect(completed.completionCodeVerified, isTrue);
     });
 
+    test('parses the rider ETA on location updates, and tolerates it missing', () async {
+      final client = RelayRealtimeClient(
+        getToken: (_) async => 'token',
+      );
+
+      final updates = client.onRiderLocationUpdate.take(2).toList();
+
+      client.handleIncomingMessageForTest({
+        'type': 'RIDER_LOCATION_UPDATE',
+        'riderId': 'rider-1',
+        'taskId': 'task-1',
+        'location': {'latitude': 6.5, 'longitude': 3.4},
+        'eta': {'stageIndex': 1, 'seconds': 420, 'meters': 2350},
+        'timestamp': '2026-10-28T10:00:00.000Z',
+      });
+      client.handleIncomingMessageForTest({
+        'type': 'RIDER_LOCATION_UPDATE',
+        'riderId': 'rider-1',
+        'taskId': 'task-1',
+        'location': {'latitude': 6.5, 'longitude': 3.4},
+      });
+
+      final [withEta, withoutEta] = await updates;
+      expect(withEta.eta?.stageIndex, equals(1));
+      expect(withEta.eta?.remaining, equals(const Duration(minutes: 7)));
+      expect(withEta.eta?.meters, equals(2350));
+      expect(withoutEta.eta, isNull);
+    });
+
     test('parses NEW_TASK_OFFER with nested task payload', () async {
       final client = RelayRealtimeClient(
         getToken: (_) async => 'token',

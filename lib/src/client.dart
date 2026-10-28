@@ -705,6 +705,7 @@ class RelayRealtimeClient {
       riderId: data['riderId'] as String,
       taskId: data['taskId'] as String,
       location: Location.fromJson(data['location'] as Map<String, dynamic>),
+      eta: RiderRouteEta.tryParse(data['eta']),
     );
     _eventsController.add(event);
   }
