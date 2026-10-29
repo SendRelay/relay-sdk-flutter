@@ -3,6 +3,7 @@ import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'models/events.dart';
 import 'models/options.dart';
+import 'connection/realtime_messages.dart';
 import 'connection/websocket_connection.dart';
 import 'subscription/subscription_manager.dart';
 import 'errors/relay_error.dart';
@@ -601,6 +602,7 @@ class RelayRealtimeClient {
       reason: data['reason'] as String?,
       cancelledAt: DateTime.parse(data['cancelledAt'] as String),
       riderId: data['riderId'] as String?,
+      cancelledBy: data['cancelledBy'] as String?,
     );
     _eventsController.add(event);
   }
@@ -706,6 +708,8 @@ class RelayRealtimeClient {
       taskId: data['taskId'] as String,
       location: Location.fromJson(data['location'] as Map<String, dynamic>),
       eta: RiderRouteEta.tryParse(data['eta']),
+      // When the rider reported this; `eta` counts down from here, not from arrival.
+      timestamp: DateTime.tryParse(data['timestamp']?.toString() ?? ''),
     );
     _eventsController.add(event);
   }
@@ -741,22 +745,14 @@ class RelayRealtimeClient {
 
   /// Subscribe to task
   Future<void> _subscribeToTask(String taskId) async {
-    await _connection.send({
-      'action': 'subscribe',
-      'type': 'task',
-      'id': taskId,
-    });
+    await _connection.send(RealtimeMessages.subscribe(taskId));
 
     _subscriptions.add(SubscriptionType.task, taskId);
   }
 
   /// Unsubscribe from task
   Future<void> _unsubscribeFromTask(String taskId) async {
-    await _connection.send({
-      'action': 'unsubscribe',
-      'type': 'task',
-      'id': taskId,
-    });
+    await _connection.send(RealtimeMessages.unsubscribe(taskId));
 
     _subscriptions.remove(SubscriptionType.task, taskId);
   }

@@ -499,6 +499,9 @@ class TaskCancelledEvent extends RelayEvent {
   /// Optional rider ID (if assigned before cancellation)
   final String? riderId;
 
+  /// Who cancelled: `DEVELOPER` or `RIDER`, when the server says
+  final String? cancelledBy;
+
   /// Create task cancelled event
   TaskCancelledEvent({
     required this.taskId,
@@ -507,6 +510,7 @@ class TaskCancelledEvent extends RelayEvent {
     this.reason,
     required this.cancelledAt,
     this.riderId,
+    this.cancelledBy,
     super.timestamp,
   });
 

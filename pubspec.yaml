@@ -1,6 +1,6 @@
 name: relay_flutter
 description: Official Relay Delivery Platform Mobile SDK - Real-time WebSocket client for Flutter applications (iOS, Android, Web, Desktop)
-version: 1.4.0
+version: 1.7.0
 homepage: https://sendrelay.com.ng
 repository: https://github.com/SendRelay/relay-sdk-flutter.git
 

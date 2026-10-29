@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:web_socket_channel/web_socket_channel.dart';
+
+import 'realtime_messages.dart';
 
 /// Heartbeat manager for WebSocket connection health monitoring
 ///
@@ -110,7 +113,7 @@ class HeartbeatManager {
 
       // Send ping
       try {
-        channel.sink.add(jsonEncode({'action': 'ping'}));
+        channel.sink.add(jsonEncode(RealtimeMessages.ping));
         _waitingForPong = true;
 
         // Start pong timeout

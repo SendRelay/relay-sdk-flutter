@@ -88,7 +88,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  relay_flutter: ^1.4.0
+  relay_flutter: ^1.7.0
 ```
 
 Then run:
