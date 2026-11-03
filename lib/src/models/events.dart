@@ -34,18 +34,31 @@ enum TaskType {
   bulkDelivery('BULK_DELIVERY'),
 
   /// Errand
-  errand('ERRAND');
+  errand('ERRAND'),
+
+  /// A value this SDK version does not know yet: Relay adds them over time.
+  unknown('UNKNOWN');
 
   /// String value
   final String value;
 
   const TaskType(this.value);
+
+  /// Parses a server value; one this SDK version does not know becomes [unknown], never an error.
+  static TaskType parse(String? value) =>
+      TaskType.values.firstWhere((e) => e.value == value, orElse: () => TaskType.unknown);
 }
 
 /// Task status enumeration
 enum TaskStatus {
+  /// Booked for a pickup time (dispatch SCHEDULED); Relay has not started looking yet
+  scheduled('SCHEDULED'),
+
   /// Pending assignment
   pending('PENDING'),
+
+  /// Still looking for a rider after the first offers, until the search ends
+  searching('SEARCHING'),
 
   /// Offered to riders
   offered('OFFERED'),
@@ -66,12 +79,19 @@ enum TaskStatus {
   cancelled('CANCELLED'),
 
   /// Payment failed
-  paymentFailed('PAYMENT_FAILED');
+  paymentFailed('PAYMENT_FAILED'),
+
+  /// A value this SDK version does not know yet: Relay adds them over time.
+  unknown('UNKNOWN');
 
   /// String value
   final String value;
 
   const TaskStatus(this.value);
+
+  /// Parses a server value; one this SDK version does not know becomes [unknown], never an error.
+  static TaskStatus parse(String? value) =>
+      TaskStatus.values.firstWhere((e) => e.value == value, orElse: () => TaskStatus.unknown);
 }
 
 /// Task priority enumeration
@@ -80,12 +100,19 @@ enum Priority {
   standard('STANDARD'),
 
   /// Urgent priority
-  urgent('URGENT');
+  urgent('URGENT'),
+
+  /// A value this SDK version does not know yet: Relay adds them over time.
+  unknown('UNKNOWN');
 
   /// String value
   final String value;
 
   const Priority(this.value);
+
+  /// Parses a server value; one this SDK version does not know becomes [unknown], never an error.
+  static Priority parse(String? value) =>
+      Priority.values.firstWhere((e) => e.value == value, orElse: () => Priority.unknown);
 }
 
 /// Stage type enumeration
@@ -94,12 +121,19 @@ enum StageType {
   pickup('PICKUP'),
 
   /// Dropoff stage
-  dropoff('DROPOFF');
+  dropoff('DROPOFF'),
+
+  /// A value this SDK version does not know yet: Relay adds them over time.
+  unknown('UNKNOWN');
 
   /// String value
   final String value;
 
   const StageType(this.value);
+
+  /// Parses a server value; one this SDK version does not know becomes [unknown], never an error.
+  static StageType parse(String? value) =>
+      StageType.values.firstWhere((e) => e.value == value, orElse: () => StageType.unknown);
 }
 
 /// Stage status enumeration
@@ -111,12 +145,19 @@ enum StageStatus {
   inProgress('IN_PROGRESS'),
 
   /// Completed
-  completed('COMPLETED');
+  completed('COMPLETED'),
+
+  /// A value this SDK version does not know yet: Relay adds them over time.
+  unknown('UNKNOWN');
 
   /// String value
   final String value;
 
   const StageStatus(this.value);
+
+  /// Parses a server value; one this SDK version does not know becomes [unknown], never an error.
+  static StageStatus parse(String? value) =>
+      StageStatus.values.firstWhere((e) => e.value == value, orElse: () => StageStatus.unknown);
 }
 
 /// Geographic location
@@ -216,14 +257,12 @@ class Stage {
     final statusValue = json['status'] as String?;
 
     return Stage(
-      type: StageType.values.firstWhere((e) => e.value == json['type']),
+      type: StageType.parse(json['type'] as String?),
       location: Location.fromJson(json['location'] as Map<String, dynamic>),
       contactName: json['contactName'] as String?,
       contactPhone: json['contactPhone'] as String?,
       notes: json['notes'] as String?,
-      status: statusValue != null
-          ? StageStatus.values.firstWhere((e) => e.value == statusValue)
-          : null,
+      status: statusValue != null ? StageStatus.parse(statusValue) : null,
       completedAt: json['completedAt'] != null ? DateTime.parse(json['completedAt'] as String) : null,
       completionPhoto: json['completionPhoto'] as String?,
     );
@@ -275,6 +314,107 @@ class TaskCreatedEvent extends RelayEvent {
 
   @override
   String toString() => 'TaskCreatedEvent(taskId: $taskId, status: CREATED)';
+}
+
+/// A booked task's search opened: Relay is now looking for a rider
+@immutable
+class TaskDispatchStartedEvent extends RelayEvent {
+  /// Task ID
+  final String taskId;
+
+  /// Developer ID
+  final String developerId;
+
+  /// Task status (pending)
+  final TaskStatus status;
+
+  /// When the rider should reach the pickup
+  final DateTime pickupAt;
+
+  /// When Relay stops looking
+  final DateTime searchExpiresAt;
+
+  /// When the search opened
+  final DateTime startedAt;
+
+  /// Create a dispatch started event
+  TaskDispatchStartedEvent({
+    required this.taskId,
+    required this.developerId,
+    required this.status,
+    required this.pickupAt,
+    required this.searchExpiresAt,
+    required this.startedAt,
+    super.timestamp,
+  });
+
+  @override
+  String toString() => 'TaskDispatchStartedEvent(taskId: $taskId)';
+}
+
+/// The task keeps looking for a rider after its first offers, until [searchExpiresAt]
+@immutable
+class TaskSearchingEvent extends RelayEvent {
+  /// Task ID
+  final String taskId;
+
+  /// Developer ID
+  final String developerId;
+
+  /// Task status (searching)
+  final TaskStatus status;
+
+  /// WAIT_FOR_RIDER or SCHEDULED (or a newer strategy, as its raw value)
+  final String strategy;
+
+  /// When Relay stops looking
+  final DateTime searchExpiresAt;
+
+  /// When the task started searching
+  final DateTime searchingAt;
+
+  /// Create a searching event
+  TaskSearchingEvent({
+    required this.taskId,
+    required this.developerId,
+    required this.status,
+    required this.strategy,
+    required this.searchExpiresAt,
+    required this.searchingAt,
+    super.timestamp,
+  });
+
+  @override
+  String toString() => 'TaskSearchingEvent(taskId: $taskId)';
+}
+
+/// A manual task (autoAssign false) that is waiting has eligible riders near its pickup. A count
+/// only, at most every few minutes.
+@immutable
+class TaskRidersNearbyEvent extends RelayEvent {
+  /// Task ID
+  final String taskId;
+
+  /// Developer ID
+  final String developerId;
+
+  /// How many eligible riders were found
+  final int ridersNearby;
+
+  /// When they were found
+  final DateTime detectedAt;
+
+  /// Create a riders nearby event
+  TaskRidersNearbyEvent({
+    required this.taskId,
+    required this.developerId,
+    required this.ridersNearby,
+    required this.detectedAt,
+    super.timestamp,
+  });
+
+  @override
+  String toString() => 'TaskRidersNearbyEvent(taskId: $taskId, ridersNearby: $ridersNearby)';
 }
 
 /// Task offered event
@@ -589,12 +729,19 @@ enum PaymentStatus {
   pendingReview('PENDING_REVIEW'),
 
   /// Dispute resolved
-  disputeResolved('DISPUTE_RESOLVED');
+  disputeResolved('DISPUTE_RESOLVED'),
+
+  /// A value this SDK version does not know yet: Relay adds them over time.
+  unknown('UNKNOWN');
 
   /// String value
   final String value;
 
   const PaymentStatus(this.value);
+
+  /// Parses a server value; one this SDK version does not know becomes [unknown], never an error.
+  static PaymentStatus parse(String? value) =>
+      PaymentStatus.values.firstWhere((e) => e.value == value, orElse: () => PaymentStatus.unknown);
 }
 
 /// Payment pending event

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.8.0 — 2026-11-03
+
+- Keep looking for a rider and scheduled pickups ([dispatch strategies](https://docs.sendrelay.com.ng/tasks/keep-looking-and-scheduling)).
+- `TaskStatus.scheduled` and `TaskStatus.searching`, and the `TaskDispatchStartedEvent`, `TaskSearchingEvent` and `TaskRidersNearbyEvent` events with their `onTask…` streams.
+- Values this version doesn't know (task status, stage type and status, task type, priority, payment status) parse as a new `unknown` case instead of throwing. Relay will add task statuses for tasks that keep searching for a rider. If you `switch` over these enums exhaustively, add a case for `unknown`.
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),

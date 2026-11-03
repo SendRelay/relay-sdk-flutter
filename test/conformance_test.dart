@@ -16,6 +16,22 @@ dynamic _read(String file) =>
 
 /// The event's fields under the API's names, so fixture paths apply to typed events.
 Map<String, dynamic> _asApiJson(RelayEvent event) => switch (event) {
+      TaskDispatchStartedEvent e => {
+          'taskId': e.taskId,
+          'status': e.status.value,
+          'pickupAt': e.pickupAt.toUtc().toIso8601String(),
+          'searchExpiresAt': e.searchExpiresAt.toUtc().toIso8601String(),
+        },
+      TaskSearchingEvent e => {
+          'taskId': e.taskId,
+          'status': e.status.value,
+          'strategy': e.strategy,
+          'searchExpiresAt': e.searchExpiresAt.toUtc().toIso8601String(),
+        },
+      TaskRidersNearbyEvent e => {
+          'taskId': e.taskId,
+          'ridersNearby': e.ridersNearby,
+        },
       TaskOfferedEvent e => {
           'taskId': e.taskId,
           'status': e.status.value,
@@ -73,6 +89,9 @@ Map<String, dynamic> _asApiJson(RelayEvent event) => switch (event) {
     };
 
 String? _eventName(RelayEvent event) => switch (event) {
+      TaskDispatchStartedEvent() => 'TASK_DISPATCH_STARTED',
+      TaskSearchingEvent() => 'TASK_SEARCHING',
+      TaskRidersNearbyEvent() => 'TASK_RIDERS_NEARBY',
       TaskOfferedEvent() => 'TASK_OFFERED',
       TaskAssignedEvent() => 'TASK_ASSIGNED',
       TaskInProgressEvent() => 'TASK_IN_PROGRESS',

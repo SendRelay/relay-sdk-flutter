@@ -35,6 +35,27 @@ void main() {
     });
 
     // Frames exactly as the server's task room publishes them (no envelope).
+    test('reads a value this SDK version does not know as unknown, without throwing', () async {
+      expect(TaskStatus.parse('SOME_FUTURE_STATUS'), TaskStatus.unknown);
+      expect(TaskStatus.parse('ASSIGNED'), TaskStatus.assigned);
+      expect(StageType.parse('VISIT'), StageType.unknown);
+      expect(PaymentStatus.parse(null), PaymentStatus.unknown);
+
+      final client = RelayRealtimeClient(getToken: (_) async => 'token');
+      final cancelled = client.onTaskCancelled.first;
+      client.handleIncomingMessageForTest({
+        'type': 'TASK_CANCELLED',
+        'taskId': 'task-1',
+        'developerId': 'dev-1',
+        'status': 'SOME_FUTURE_STATUS',
+        'cancelledAt': '2026-10-12T10:00:00.000Z',
+        'cancelledBy': 'DEVELOPER',
+        'reason': 'Customer request',
+      });
+      expect((await cancelled).status, TaskStatus.unknown);
+      client.dispose();
+    });
+
     test('parses task frames as published by the server', () async {
       final client = RelayRealtimeClient(
         getToken: (_) async => 'token',

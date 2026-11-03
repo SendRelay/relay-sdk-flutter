@@ -272,6 +272,9 @@ export 'src/models/events.dart'
         Stage,
         // Task lifecycle events
         TaskCreatedEvent,
+        TaskDispatchStartedEvent,
+        TaskSearchingEvent,
+        TaskRidersNearbyEvent,
         TaskOfferedEvent,
         TaskAssignedEvent,
         TaskInProgressEvent,

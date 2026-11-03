@@ -69,6 +69,21 @@ class RelayRealtimeClient {
       .where((event) => event is TaskCreatedEvent)
       .cast<TaskCreatedEvent>();
 
+  /// Stream of dispatch started events (a booking's search opened)
+  Stream<TaskDispatchStartedEvent> get onTaskDispatchStarted => events
+      .where((event) => event is TaskDispatchStartedEvent)
+      .cast<TaskDispatchStartedEvent>();
+
+  /// Stream of searching events (a task keeps looking for a rider)
+  Stream<TaskSearchingEvent> get onTaskSearching => events
+      .where((event) => event is TaskSearchingEvent)
+      .cast<TaskSearchingEvent>();
+
+  /// Stream of riders nearby events (manual waiting tasks)
+  Stream<TaskRidersNearbyEvent> get onTaskRidersNearby => events
+      .where((event) => event is TaskRidersNearbyEvent)
+      .cast<TaskRidersNearbyEvent>();
+
   /// Stream of task offered events
   Stream<TaskOfferedEvent> get onTaskOffered => events
       .where((event) => event is TaskOfferedEvent)
@@ -454,6 +469,34 @@ class RelayRealtimeClient {
       switch (type) {
         case 'TASK_CREATED':
           _emitTaskCreatedEvent(payload);
+          break;
+        case 'TASK_DISPATCH_STARTED':
+          _eventsController.add(TaskDispatchStartedEvent(
+            taskId: payload['taskId'] as String,
+            developerId: payload['developerId'] as String? ?? '',
+            status: _parseTaskStatus(payload['status'] as String? ?? 'PENDING'),
+            pickupAt: _parseDateTime(payload['pickupAt']),
+            searchExpiresAt: _parseDateTime(payload['searchExpiresAt']),
+            startedAt: _parseDateTime(payload['startedAt']),
+          ));
+          break;
+        case 'TASK_SEARCHING':
+          _eventsController.add(TaskSearchingEvent(
+            taskId: payload['taskId'] as String,
+            developerId: payload['developerId'] as String? ?? '',
+            status: _parseTaskStatus(payload['status'] as String? ?? 'SEARCHING'),
+            strategy: payload['strategy'] as String? ?? 'WAIT_FOR_RIDER',
+            searchExpiresAt: _parseDateTime(payload['searchExpiresAt']),
+            searchingAt: _parseDateTime(payload['searchingAt']),
+          ));
+          break;
+        case 'TASK_RIDERS_NEARBY':
+          _eventsController.add(TaskRidersNearbyEvent(
+            taskId: payload['taskId'] as String,
+            developerId: payload['developerId'] as String? ?? '',
+            ridersNearby: _asInt(payload['ridersNearby']),
+            detectedAt: _parseDateTime(payload['detectedAt']),
+          ));
           break;
         case 'TASK_OFFERED':
           _emitTaskOfferedEvent(payload);
@@ -863,32 +906,32 @@ class RelayRealtimeClient {
 
   /// Parse task type from string
   TaskType _parseTaskType(String value) {
-    return TaskType.values.firstWhere((e) => e.value == value);
+    return TaskType.parse(value);
   }
 
   /// Parse task status from string
   TaskStatus _parseTaskStatus(String value) {
-    return TaskStatus.values.firstWhere((e) => e.value == value);
+    return TaskStatus.parse(value);
   }
 
   /// Parse priority from string
   Priority _parsePriority(String value) {
-    return Priority.values.firstWhere((e) => e.value == value);
+    return Priority.parse(value);
   }
 
   /// Parse stage type from string
   StageType _parseStageType(String value) {
-    return StageType.values.firstWhere((e) => e.value == value);
+    return StageType.parse(value);
   }
 
   /// Parse payment status from string
   PaymentStatus _parsePaymentStatus(String value) {
-    return PaymentStatus.values.firstWhere((e) => e.value == value);
+    return PaymentStatus.parse(value);
   }
 
   PaymentStatus? _parseOptionalPaymentStatus(String? value) {
     if (value == null) return null;
-    return PaymentStatus.values.firstWhere((e) => e.value == value);
+    return PaymentStatus.parse(value);
   }
 
   int _asInt(dynamic value) {
