@@ -388,6 +388,77 @@ class TaskSearchingEvent extends RelayEvent {
   String toString() => 'TaskSearchingEvent(taskId: $taskId)';
 }
 
+/// The rider reached a stop (inside its geofence), once per stop.
+@immutable
+class StageArrivedEvent extends RelayEvent {
+  final String taskId;
+  final String riderId;
+  final int stageIndex;
+
+  /// PICKUP or DROPOFF
+  final String stageType;
+  final DateTime arrivedAt;
+
+  StageArrivedEvent({
+    required this.taskId,
+    required this.riderId,
+    required this.stageIndex,
+    required this.stageType,
+    required this.arrivedAt,
+    super.timestamp,
+  });
+
+  @override
+  String toString() => 'StageArrivedEvent(taskId: $taskId, stageIndex: $stageIndex)';
+}
+
+/// The business edited notes, instructions or a stop's contact. Read the task for the new values.
+@immutable
+class TaskDetailsUpdatedEvent extends RelayEvent {
+  final String taskId;
+
+  /// Top-level fields that changed: notes, externalId, stages
+  final List<String> changed;
+
+  /// Stops whose instructions or contact changed
+  final List<int> stageIndexes;
+
+  TaskDetailsUpdatedEvent({
+    required this.taskId,
+    required this.changed,
+    required this.stageIndexes,
+    super.timestamp,
+  });
+
+  @override
+  String toString() => 'TaskDetailsUpdatedEvent(taskId: $taskId, changed: $changed)';
+}
+
+/// Opt-in (`onRiderCancel: FIND_ANOTHER`): the rider cancelled before pickup and Relay is
+/// finding another. The task is PENDING again.
+@immutable
+class TaskRiderUnassignedEvent extends RelayEvent {
+  final String taskId;
+  final String riderId;
+  final String reason;
+  final TaskStatus status;
+
+  /// Further rider cancels the task can survive before it ends CANCELLED
+  final int researchesLeft;
+
+  TaskRiderUnassignedEvent({
+    required this.taskId,
+    required this.riderId,
+    required this.reason,
+    required this.status,
+    required this.researchesLeft,
+    super.timestamp,
+  });
+
+  @override
+  String toString() => 'TaskRiderUnassignedEvent(taskId: $taskId, riderId: $riderId)';
+}
+
 /// A manual task (autoAssign false) that is waiting has eligible riders near its pickup. A count
 /// only, at most every few minutes.
 @immutable

@@ -93,6 +93,11 @@
       ]
     },
     {
+      "name": "meta",
+      "version": "1.19.0",
+      "dependencies": []
+    },
+    {
       "name": "collection",
       "version": "1.19.1",
       "dependencies": []
@@ -107,6 +112,11 @@
         "matcher",
         "meta"
       ]
+    },
+    {
+      "name": "vector_math",
+      "version": "2.4.4",
+      "dependencies": []
     },
     {
       "name": "stack_trace",
@@ -183,17 +193,6 @@
       ]
     },
     {
-      "name": "web_socket_channel",
-      "version": "3.0.3",
-      "dependencies": [
-        "async",
-        "crypto",
-        "stream_channel",
-        "web",
-        "web_socket"
-      ]
-    },
-    {
       "name": "shared_preferences",
       "version": "2.5.5",
       "dependencies": [
@@ -204,6 +203,17 @@
         "shared_preferences_platform_interface",
         "shared_preferences_web",
         "shared_preferences_windows"
+      ]
+    },
+    {
+      "name": "web_socket_channel",
+      "version": "3.0.3",
+      "dependencies": [
+        "async",
+        "crypto",
+        "stream_channel",
+        "web",
+        "web_socket"
       ]
     },
     {
@@ -280,20 +290,6 @@
       ]
     },
     {
-      "name": "web_socket",
-      "version": "1.0.1",
-      "dependencies": [
-        "web"
-      ]
-    },
-    {
-      "name": "crypto",
-      "version": "3.0.7",
-      "dependencies": [
-        "typed_data"
-      ]
-    },
-    {
       "name": "shared_preferences_windows",
       "version": "2.4.1",
       "dependencies": [
@@ -349,6 +345,20 @@
       "dependencies": [
         "flutter",
         "shared_preferences_platform_interface"
+      ]
+    },
+    {
+      "name": "web_socket",
+      "version": "1.0.1",
+      "dependencies": [
+        "web"
+      ]
+    },
+    {
+      "name": "crypto",
+      "version": "3.0.7",
+      "dependencies": [
+        "typed_data"
       ]
     },
     {
@@ -425,16 +435,6 @@
         "meta",
         "path"
       ]
-    },
-    {
-      "name": "meta",
-      "version": "1.19.0",
-      "dependencies": []
-    },
-    {
-      "name": "vector_math",
-      "version": "2.4.4",
-      "dependencies": []
     }
   ],
   "configVersion": 1

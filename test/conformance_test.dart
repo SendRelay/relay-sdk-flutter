@@ -36,6 +36,23 @@ Map<String, dynamic> _asApiJson(RelayEvent event) => switch (event) {
           'taskId': e.taskId,
           'status': e.status.value,
         },
+      StageArrivedEvent e => {
+          'taskId': e.taskId,
+          'riderId': e.riderId,
+          'stageIndex': e.stageIndex,
+          'stageType': e.stageType,
+        },
+      TaskDetailsUpdatedEvent e => {
+          'taskId': e.taskId,
+          'changed': e.changed,
+          'stageIndexes': e.stageIndexes,
+        },
+      TaskRiderUnassignedEvent e => {
+          'taskId': e.taskId,
+          'riderId': e.riderId,
+          'status': e.status.value,
+          'researchesLeft': e.researchesLeft,
+        },
       TaskAssignedEvent e => {
           'taskId': e.taskId,
           'status': e.status.value,
@@ -93,6 +110,9 @@ String? _eventName(RelayEvent event) => switch (event) {
       TaskSearchingEvent() => 'TASK_SEARCHING',
       TaskRidersNearbyEvent() => 'TASK_RIDERS_NEARBY',
       TaskOfferedEvent() => 'TASK_OFFERED',
+      StageArrivedEvent() => 'STAGE_ARRIVED',
+      TaskDetailsUpdatedEvent() => 'TASK_DETAILS_UPDATED',
+      TaskRiderUnassignedEvent() => 'TASK_RIDER_UNASSIGNED',
       TaskAssignedEvent() => 'TASK_ASSIGNED',
       TaskInProgressEvent() => 'TASK_IN_PROGRESS',
       StageCompletedEvent() => 'STAGE_COMPLETED',

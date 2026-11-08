@@ -84,6 +84,21 @@ class RelayRealtimeClient {
       .where((event) => event is TaskRidersNearbyEvent)
       .cast<TaskRidersNearbyEvent>();
 
+  /// Stream of arrivals: the rider reached a stop
+  Stream<StageArrivedEvent> get onStageArrived => events
+      .where((event) => event is StageArrivedEvent)
+      .cast<StageArrivedEvent>();
+
+  /// Stream of edits to notes, instructions or a stop's contact
+  Stream<TaskDetailsUpdatedEvent> get onTaskDetailsUpdated => events
+      .where((event) => event is TaskDetailsUpdatedEvent)
+      .cast<TaskDetailsUpdatedEvent>();
+
+  /// Stream of rider cancels that Relay answers by finding another rider (opt-in)
+  Stream<TaskRiderUnassignedEvent> get onTaskRiderUnassigned => events
+      .where((event) => event is TaskRiderUnassignedEvent)
+      .cast<TaskRiderUnassignedEvent>();
+
   /// Stream of task offered events
   Stream<TaskOfferedEvent> get onTaskOffered => events
       .where((event) => event is TaskOfferedEvent)
@@ -496,6 +511,31 @@ class RelayRealtimeClient {
             developerId: payload['developerId'] as String? ?? '',
             ridersNearby: _asInt(payload['ridersNearby']),
             detectedAt: _parseDateTime(payload['detectedAt']),
+          ));
+          break;
+        case 'STAGE_ARRIVED':
+          _eventsController.add(StageArrivedEvent(
+            taskId: payload['taskId'] as String,
+            riderId: payload['riderId'] as String? ?? '',
+            stageIndex: _asInt(payload['stageIndex']),
+            stageType: payload['stageType'] as String? ?? '',
+            arrivedAt: _parseDateTime(payload['arrivedAt']),
+          ));
+          break;
+        case 'TASK_DETAILS_UPDATED':
+          _eventsController.add(TaskDetailsUpdatedEvent(
+            taskId: payload['taskId'] as String,
+            changed: (payload['changed'] as List? ?? const []).whereType<String>().toList(),
+            stageIndexes: (payload['stageIndexes'] as List? ?? const []).whereType<num>().map((n) => n.toInt()).toList(),
+          ));
+          break;
+        case 'TASK_RIDER_UNASSIGNED':
+          _eventsController.add(TaskRiderUnassignedEvent(
+            taskId: payload['taskId'] as String,
+            riderId: payload['riderId'] as String? ?? '',
+            reason: payload['reason'] as String? ?? '',
+            status: _parseTaskStatus(payload['status'] as String? ?? 'PENDING'),
+            researchesLeft: _asInt(payload['researchesLeft']),
           ));
           break;
         case 'TASK_OFFERED':

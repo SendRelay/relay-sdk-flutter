@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.9.0 — 2026-11-08
+
+- New events and streams: `onStageArrived` (`StageArrivedEvent`), `onTaskDetailsUpdated` (`TaskDetailsUpdatedEvent`) and, for tasks created with `onRiderCancel: FIND_ANOTHER`, `onTaskRiderUnassigned` (`TaskRiderUnassignedEvent`).
+
 ## 1.8.0 — 2026-11-03
 
 - Keep looking for a rider and scheduled pickups ([dispatch strategies](https://docs.sendrelay.com.ng/tasks/keep-looking-and-scheduling)).
