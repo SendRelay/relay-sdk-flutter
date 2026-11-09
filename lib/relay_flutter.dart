@@ -304,6 +304,7 @@ export 'src/models/events.dart'
 export 'src/models/presence.dart'
     show
         PresenceMap,
+        PresenceRequiredVehicle,
         PresenceCell,
         PresencePoint,
         PresenceResolution,

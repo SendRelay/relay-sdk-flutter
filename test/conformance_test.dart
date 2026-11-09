@@ -157,7 +157,7 @@ void main() {
           return;
         }
         expect(named.map(_eventName).toList(), [expected['event']]);
-        final json = _asApiJson(named.single);
+        final json = {..._asApiJson(named.single), 'revision': named.single.revision};
         final fields = (expected['fields'] as Map?) ?? {};
         for (final entry in fields.entries) {
           final key = entry.key as String;
@@ -170,6 +170,34 @@ void main() {
             );
           } else {
             expect(_lookup(json, key), entry.value, reason: key);
+          }
+        }
+      });
+    }
+  });
+
+  group('conformance ordering', () {
+    for (final c in (_read('realtime/ordering.json')['cases'] as List)) {
+      test(c['name'] as String, () async {
+        final client = RelayRealtimeClient(getToken: (_) async => 'token');
+        final seen = <RelayEvent>[];
+        final sub = client.events.listen(seen.add);
+        for (final frame in c['frames'] as List) {
+          client.handleIncomingMessageForTest(Map<String, dynamic>.from(frame as Map));
+        }
+        await Future<void>.delayed(Duration.zero);
+        await sub.cancel();
+
+        final named = seen.where((e) => _eventName(e) != null).toList();
+        final expected = (c['expect'] as List).cast<Map>();
+        expect(named.map(_eventName).toList(), expected.map((e) => e['event']).toList());
+        for (var i = 0; i < expected.length; i++) {
+          final fields = (expected[i]['fields'] as Map?) ?? {};
+          if (fields.containsKey('taskId')) {
+            expect(_lookup(_asApiJson(named[i]), 'taskId'), fields['taskId'], reason: 'taskId');
+          }
+          if (fields.containsKey('revision')) {
+            expect(named[i].revision, fields['revision'], reason: 'revision');
           }
         }
       });

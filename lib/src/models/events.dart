@@ -6,8 +6,13 @@ abstract class RelayEvent {
   /// Timestamp when the event occurred
   final DateTime timestamp;
 
+  /// The task's revision after this event, as on webhooks and task reads; null when the frame has
+  /// none (location updates, older servers). The client drops a task frame at or below the last
+  /// revision it delivered for that task, so events arrive in order and once.
+  final int? revision;
+
   /// Create a Relay event
-  RelayEvent({DateTime? timestamp})
+  RelayEvent({DateTime? timestamp, this.revision})
       : timestamp = timestamp ?? DateTime.timestamp();
 
   @override
@@ -310,6 +315,7 @@ class TaskCreatedEvent extends RelayEvent {
     required this.stages,
     required this.createdAt,
     super.timestamp,
+    super.revision,
   });
 
   @override
@@ -346,6 +352,7 @@ class TaskDispatchStartedEvent extends RelayEvent {
     required this.searchExpiresAt,
     required this.startedAt,
     super.timestamp,
+    super.revision,
   });
 
   @override
@@ -382,6 +389,7 @@ class TaskSearchingEvent extends RelayEvent {
     required this.searchExpiresAt,
     required this.searchingAt,
     super.timestamp,
+    super.revision,
   });
 
   @override
@@ -406,6 +414,7 @@ class StageArrivedEvent extends RelayEvent {
     required this.stageType,
     required this.arrivedAt,
     super.timestamp,
+    super.revision,
   });
 
   @override
@@ -428,6 +437,7 @@ class TaskDetailsUpdatedEvent extends RelayEvent {
     required this.changed,
     required this.stageIndexes,
     super.timestamp,
+    super.revision,
   });
 
   @override
@@ -453,6 +463,7 @@ class TaskRiderUnassignedEvent extends RelayEvent {
     required this.status,
     required this.researchesLeft,
     super.timestamp,
+    super.revision,
   });
 
   @override
@@ -482,6 +493,7 @@ class TaskRidersNearbyEvent extends RelayEvent {
     required this.ridersNearby,
     required this.detectedAt,
     super.timestamp,
+    super.revision,
   });
 
   @override
@@ -518,6 +530,7 @@ class TaskOfferedEvent extends RelayEvent {
     required this.ridersOffered,
     required this.offeredAt,
     super.timestamp,
+    super.revision,
   });
 
   @override
@@ -558,6 +571,7 @@ class TaskAssignedEvent extends RelayEvent {
     required this.deliveryFee,
     required this.currentStageIndex,
     super.timestamp,
+    super.revision,
   });
 
   @override
@@ -594,6 +608,7 @@ class TaskInProgressEvent extends RelayEvent {
     required this.currentStageIndex,
     required this.startedAt,
     super.timestamp,
+    super.revision,
   });
 
   @override
@@ -639,6 +654,7 @@ class TaskCompletedEvent extends RelayEvent {
     this.paymentStatus,
     this.completionCodeVerified,
     super.timestamp,
+    super.revision,
   });
 
   @override
@@ -683,6 +699,7 @@ class TaskFailedEvent extends RelayEvent {
     required this.refundAmount,
     this.riderId,
     super.timestamp,
+    super.revision,
   });
 
   @override
@@ -723,6 +740,7 @@ class TaskCancelledEvent extends RelayEvent {
     this.riderId,
     this.cancelledBy,
     super.timestamp,
+    super.revision,
   });
 
   @override
@@ -775,6 +793,7 @@ class StageCompletedEvent extends RelayEvent {
     this.nextStageIndex,
     required this.totalStages,
     super.timestamp,
+    super.revision,
   });
 
   @override
@@ -853,6 +872,7 @@ class PaymentPendingEvent extends RelayEvent {
     required this.releaseAt,
     required this.disputeWindowHours,
     super.timestamp,
+    super.revision,
   });
 
   @override
@@ -893,6 +913,7 @@ class PaymentReleasedEvent extends RelayEvent {
     required this.status,
     required this.releasedAt,
     super.timestamp,
+    super.revision,
   });
 
   @override
@@ -945,6 +966,7 @@ class PaymentDisputedEvent extends RelayEvent {
     required this.description,
     required this.disputedAt,
     super.timestamp,
+    super.revision,
   });
 
   @override
@@ -1001,6 +1023,7 @@ class PaymentDisputeResolvedEvent extends RelayEvent {
     required this.resolvedBy,
     this.notes,
     super.timestamp,
+    super.revision,
   });
 
   @override
@@ -1034,6 +1057,7 @@ class RiderLocationUpdateEvent extends RelayEvent {
     required this.location,
     this.eta,
     super.timestamp,
+    super.revision,
   });
 
   @override
@@ -1128,6 +1152,7 @@ class NewTaskOfferEvent extends RelayEvent {
     this.estimatedDistance,
     this.estimatedDuration,
     super.timestamp,
+    super.revision,
   });
 
   @override
@@ -1171,6 +1196,7 @@ class ConnectionOpenEvent extends RelayEvent {
   ConnectionOpenEvent({
     this.state = ConnectionState.connected,
     super.timestamp,
+    super.revision,
   });
 
   @override
@@ -1195,6 +1221,7 @@ class ConnectionCloseEvent extends RelayEvent {
     this.code,
     this.reason,
     super.timestamp,
+    super.revision,
   });
 
   @override
@@ -1211,6 +1238,7 @@ class ConnectionErrorEvent extends RelayEvent {
   ConnectionErrorEvent({
     required this.error,
     super.timestamp,
+    super.revision,
   });
 
   @override
@@ -1231,6 +1259,7 @@ class ConnectionReconnectingEvent extends RelayEvent {
     required this.attempt,
     required this.delay,
     super.timestamp,
+    super.revision,
   });
 
   @override
@@ -1251,6 +1280,7 @@ class TokenExpiringEvent extends RelayEvent {
     required this.expiresAt,
     required this.warningDuration,
     super.timestamp,
+    super.revision,
   });
 
   @override

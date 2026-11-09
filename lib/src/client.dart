@@ -279,6 +279,7 @@ class RelayRealtimeClient {
   /// ```
   Future<void> stopListening(String taskId) async {
     _listeningTo.remove(taskId);
+    _lastRevision.remove(taskId);
 
     if (!_subscriptions.has(SubscriptionType.task, taskId)) {
       return;
@@ -456,6 +457,26 @@ class RelayRealtimeClient {
   }
 
   /// Handle incoming WebSocket message
+  /// Highest revision delivered per task: a frame at or below it is a duplicate or arrived late.
+  final Map<String, int> _lastRevision = {};
+
+  /// Task frames carry the task's `revision`, which only grows. A frame at or below the last one
+  /// delivered for its task is not delivered; frames without one always are.
+  bool _isStale(Map<String, dynamic> payload) {
+    final revision = _revisionOf(payload);
+    final taskId = payload['taskId'];
+    if (revision == null || taskId is! String) return false;
+    final last = _lastRevision[taskId];
+    if (last != null && revision <= last) return true;
+    _lastRevision[taskId] = revision;
+    return false;
+  }
+
+  static int? _revisionOf(Map<String, dynamic> data) {
+    final value = data['revision'];
+    return value is num && value.isFinite ? value.toInt() : null;
+  }
+
   void _handleIncomingMessage(Map<String, dynamic> message) {
     Map<String, dynamic> payload = message;
     String? type = message['type'] as String?;
@@ -480,6 +501,11 @@ class RelayRealtimeClient {
       return;
     }
 
+    if (_isStale(payload)) {
+      _log('debug', 'Dropped $type at revision ${payload['revision']}: already past it');
+      return;
+    }
+
     try {
       switch (type) {
         case 'TASK_CREATED':
@@ -487,6 +513,7 @@ class RelayRealtimeClient {
           break;
         case 'TASK_DISPATCH_STARTED':
           _eventsController.add(TaskDispatchStartedEvent(
+            revision: _revisionOf(payload),
             taskId: payload['taskId'] as String,
             developerId: payload['developerId'] as String? ?? '',
             status: _parseTaskStatus(payload['status'] as String? ?? 'PENDING'),
@@ -497,6 +524,7 @@ class RelayRealtimeClient {
           break;
         case 'TASK_SEARCHING':
           _eventsController.add(TaskSearchingEvent(
+            revision: _revisionOf(payload),
             taskId: payload['taskId'] as String,
             developerId: payload['developerId'] as String? ?? '',
             status: _parseTaskStatus(payload['status'] as String? ?? 'SEARCHING'),
@@ -507,6 +535,7 @@ class RelayRealtimeClient {
           break;
         case 'TASK_RIDERS_NEARBY':
           _eventsController.add(TaskRidersNearbyEvent(
+            revision: _revisionOf(payload),
             taskId: payload['taskId'] as String,
             developerId: payload['developerId'] as String? ?? '',
             ridersNearby: _asInt(payload['ridersNearby']),
@@ -515,6 +544,7 @@ class RelayRealtimeClient {
           break;
         case 'STAGE_ARRIVED':
           _eventsController.add(StageArrivedEvent(
+            revision: _revisionOf(payload),
             taskId: payload['taskId'] as String,
             riderId: payload['riderId'] as String? ?? '',
             stageIndex: _asInt(payload['stageIndex']),
@@ -524,6 +554,7 @@ class RelayRealtimeClient {
           break;
         case 'TASK_DETAILS_UPDATED':
           _eventsController.add(TaskDetailsUpdatedEvent(
+            revision: _revisionOf(payload),
             taskId: payload['taskId'] as String,
             changed: (payload['changed'] as List? ?? const []).whereType<String>().toList(),
             stageIndexes: (payload['stageIndexes'] as List? ?? const []).whereType<num>().map((n) => n.toInt()).toList(),
@@ -531,6 +562,7 @@ class RelayRealtimeClient {
           break;
         case 'TASK_RIDER_UNASSIGNED':
           _eventsController.add(TaskRiderUnassignedEvent(
+            revision: _revisionOf(payload),
             taskId: payload['taskId'] as String,
             riderId: payload['riderId'] as String? ?? '',
             reason: payload['reason'] as String? ?? '',
@@ -593,6 +625,7 @@ class RelayRealtimeClient {
         .toList();
 
     final event = TaskCreatedEvent(
+      revision: _revisionOf(data),
       taskId: data['taskId'] as String,
       developerId: data['developerId'] as String,
       taskType: _parseTaskType(data['taskType'] as String),
@@ -608,6 +641,7 @@ class RelayRealtimeClient {
   /// Emit task offered event
   void _emitTaskOfferedEvent(Map<String, dynamic> data) {
     final event = TaskOfferedEvent(
+      revision: _revisionOf(data),
       taskId: data['taskId'] as String,
       developerId: data['developerId'] as String,
       status: _parseTaskStatus(data['status'] as String),
@@ -621,6 +655,7 @@ class RelayRealtimeClient {
   /// Emit task assigned event
   void _emitTaskAssignedEvent(Map<String, dynamic> data) {
     final event = TaskAssignedEvent(
+      revision: _revisionOf(data),
       taskId: data['taskId'] as String,
       riderId: data['riderId'] as String,
       developerId: data['developerId'] as String,
@@ -635,6 +670,7 @@ class RelayRealtimeClient {
   /// Emit task in progress event
   void _emitTaskInProgressEvent(Map<String, dynamic> data) {
     final event = TaskInProgressEvent(
+      revision: _revisionOf(data),
       taskId: data['taskId'] as String,
       riderId: data['riderId'] as String,
       developerId: data['developerId'] as String,
@@ -648,6 +684,7 @@ class RelayRealtimeClient {
   /// Emit task completed event
   void _emitTaskCompletedEvent(Map<String, dynamic> data) {
     final event = TaskCompletedEvent(
+      revision: _revisionOf(data),
       taskId: data['taskId'] as String,
       riderId: data['riderId'] as String,
       developerId: data['developerId'] as String,
@@ -664,6 +701,7 @@ class RelayRealtimeClient {
   /// Emit task failed event
   void _emitTaskFailedEvent(Map<String, dynamic> data) {
     final event = TaskFailedEvent(
+      revision: _revisionOf(data),
       taskId: data['taskId'] as String,
       developerId: data['developerId'] as String,
       status: _parseTaskStatus(data['status'] as String),
@@ -679,6 +717,7 @@ class RelayRealtimeClient {
   /// Emit task cancelled event
   void _emitTaskCancelledEvent(Map<String, dynamic> data) {
     final event = TaskCancelledEvent(
+      revision: _revisionOf(data),
       taskId: data['taskId'] as String,
       developerId: data['developerId'] as String,
       status: _parseTaskStatus(data['status'] as String),
@@ -703,6 +742,7 @@ class RelayRealtimeClient {
         : _parseDateTime(data['completedAt']);
 
     final event = StageCompletedEvent(
+      revision: _revisionOf(data),
       taskId: data['taskId'] as String,
       riderId: data['riderId'] as String,
       developerId: data['developerId'] as String,
@@ -723,6 +763,7 @@ class RelayRealtimeClient {
   /// Emit payment pending event
   void _emitPaymentPendingEvent(Map<String, dynamic> data) {
     final event = PaymentPendingEvent(
+      revision: _revisionOf(data),
       transactionId: data['transactionId'] as String,
       taskId: data['taskId'] as String,
       developerId: data['developerId'] as String,
@@ -738,6 +779,7 @@ class RelayRealtimeClient {
   /// Emit payment released event
   void _emitPaymentReleasedEvent(Map<String, dynamic> data) {
     final event = PaymentReleasedEvent(
+      revision: _revisionOf(data),
       transactionId: data['transactionId'] as String,
       taskId: data['taskId'] as String,
       developerId: data['developerId'] as String,
@@ -752,6 +794,7 @@ class RelayRealtimeClient {
   /// Emit payment disputed event
   void _emitPaymentDisputedEvent(Map<String, dynamic> data) {
     final event = PaymentDisputedEvent(
+      revision: _revisionOf(data),
       disputeId: data['disputeId'] as String,
       transactionId: data['transactionId'] as String,
       taskId: data['taskId'] as String,
@@ -769,6 +812,7 @@ class RelayRealtimeClient {
   /// Emit payment dispute resolved event
   void _emitPaymentDisputeResolvedEvent(Map<String, dynamic> data) {
     final event = PaymentDisputeResolvedEvent(
+      revision: _revisionOf(data),
       disputeId: data['disputeId'] as String,
       transactionId: data['transactionId'] as String,
       taskId: data['taskId'] as String,

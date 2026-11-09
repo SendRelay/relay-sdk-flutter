@@ -111,6 +111,33 @@ class PresenceCell {
   );
 }
 
+/// One vehicle Relay counted for a job, with the equipment a rider on it
+/// needs (for example `BOX` on a `MOTORCYCLE` for food).
+@immutable
+class PresenceRequiredVehicle {
+  /// Vehicle type, e.g. `MOTORCYCLE`
+  final String vehicleType;
+
+  /// `BOX`, `REFRIGERATION` or `AIR_CONDITIONING`; treat others as equipment
+  /// you can't check.
+  final List<String> equipment;
+
+  /// Create a required vehicle
+  const PresenceRequiredVehicle({
+    required this.vehicleType,
+    required this.equipment,
+  });
+
+  /// Parse from JSON
+  factory PresenceRequiredVehicle.fromJson(Map<String, dynamic> json) =>
+      PresenceRequiredVehicle(
+        vehicleType: json['vehicleType'] as String,
+        equipment: (json['equipment'] as List? ?? const [])
+            .map((item) => item.toString())
+            .toList(growable: false),
+      );
+}
+
 /// Anonymous presence of available riders around a point — the body of
 /// `GET /v1/sdk/presence`.
 ///
@@ -159,6 +186,10 @@ class PresenceMap {
   /// Snapshots are cached; polling faster than this returns the same data
   final Duration refreshAfter;
 
+  /// Set when your backend asked for a job (`taskType`): only riders who
+  /// could take it are counted, and these are what they have. Null otherwise.
+  final List<PresenceRequiredVehicle>? requirements;
+
   /// Create a presence map
   const PresenceMap({
     required this.mode,
@@ -171,6 +202,7 @@ class PresenceMap {
     required this.ridersByVehicleType,
     required this.generatedAt,
     required this.refreshAfter,
+    this.requirements,
   });
 
   /// Parse from JSON
@@ -196,6 +228,15 @@ class PresenceMap {
       refreshAfter: Duration(
         seconds: (json['refreshAfterSeconds'] as num?)?.toInt() ?? 30,
       ),
+      requirements: json['requirements'] is Map
+          ? ((json['requirements'] as Map)['vehicles'] as List? ?? const [])
+              .map(
+                (v) => PresenceRequiredVehicle.fromJson(
+                  Map<String, dynamic>.from(v as Map),
+                ),
+              )
+              .toList(growable: false)
+          : null,
     );
   }
 }

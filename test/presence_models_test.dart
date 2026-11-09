@@ -44,5 +44,37 @@ void main() {
     expect(presence.cells.single.boundary, hasLength(3));
     expect(presence.ridersByVehicleType['MOTORCYCLE'], 3);
     expect(presence.refreshAfter, const Duration(seconds: 30));
+    expect(presence.requirements, isNull);
+  });
+
+  test('PresenceMap reads what a job needs when presence was filtered by it', () {
+    final presence = PresenceMap.fromJson({
+      'mode': 'live',
+      'simulated': false,
+      'resolution': 'NEIGHBOURHOOD',
+      'area': {
+        'center': {'latitude': 6.52, 'longitude': 3.38},
+        'radiusKm': 4,
+      },
+      'cells': <dynamic>[],
+      'totals': {
+        'availableRiders': 0,
+        'byVehicleType': <String, dynamic>{},
+      },
+      'generatedAt': '2026-11-09T10:00:00.000Z',
+      'refreshAfterSeconds': 30,
+      'requirements': {
+        'vehicles': [
+          {
+            'vehicleType': 'MOTORCYCLE',
+            'equipment': ['BOX'],
+          },
+        ],
+      },
+    });
+
+    expect(presence.requirements, hasLength(1));
+    expect(presence.requirements!.single.vehicleType, 'MOTORCYCLE');
+    expect(presence.requirements!.single.equipment, ['BOX']);
   });
 }

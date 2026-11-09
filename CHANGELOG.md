@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.10.0 — 2026-11-09
+
+- `RelayEvent.revision`. Task events carry `revision` (the task's revision after the event, as on webhooks). The client delivers each task's events in order and once: a frame at or below the last revision it delivered for that task is dropped. Location updates and frames without a revision are always delivered.
+- `PresenceMap.requirements` (`PresenceRequiredVehicle`): when your backend asks for presence for a job (`taskType`), only riders who could take it are counted, and this says what they have. Null otherwise.
+
 ## 1.9.0 — 2026-11-08
 
 - New events and streams: `onStageArrived` (`StageArrivedEvent`), `onTaskDetailsUpdated` (`TaskDetailsUpdatedEvent`) and, for tasks created with `onRiderCancel: FIND_ANOTHER`, `onTaskRiderUnassigned` (`TaskRiderUnassignedEvent`).
