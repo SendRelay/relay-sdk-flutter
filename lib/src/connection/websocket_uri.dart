@@ -1,13 +1,13 @@
 import '../errors/relay_error.dart';
 
-/// Default Relay WebSocket API path.
+/// Default SendRelay WebSocket API path.
 const String relayDefaultWebSocketPath = '/v1/realtime/ws';
 
-/// Default Relay WebSocket API URL.
+/// Default SendRelay WebSocket API URL.
 const String relayDefaultWebSocketUrl =
     'https://api.sendrelay.com.ng$relayDefaultWebSocketPath';
 
-/// Build a Relay WebSocket URI with normalized protocol and safe query encoding.
+/// Build a SendRelay WebSocket URI with normalized protocol and safe query encoding.
 ///
 /// Normalization rules:
 /// - `https` -> `wss`

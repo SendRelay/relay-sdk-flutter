@@ -1,6 +1,6 @@
-/// Relay Flutter SDK - Mobile SDK
+/// SendRelay Flutter SDK - Mobile SDK
 ///
-/// Official **client-side mobile** SDK for integrating with the Relay delivery platform.
+/// Official **client-side mobile** SDK for integrating with the SendRelay delivery platform.
 ///
 /// Provides real-time task tracking with WebSocket support, automatic token
 /// provisioning, and comprehensive event streaming for iOS, Android, Web, and Desktop platforms.
@@ -171,7 +171,7 @@
 ///
 /// ```dart
 /// relay.onConnectionOpen.listen((_) {
-///   print('Connected to Relay');
+///   print('Connected to SendRelay');
 /// });
 ///
 /// relay.onConnectionClose.listen((event) {

@@ -111,7 +111,7 @@ class PresenceCell {
   );
 }
 
-/// One vehicle Relay counted for a job, with the equipment a rider on it
+/// One vehicle SendRelay counted for a job, with the equipment a rider on it
 /// needs (for example `BOX` on a `MOTORCYCLE` for food).
 @immutable
 class PresenceRequiredVehicle {

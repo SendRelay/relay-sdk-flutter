@@ -1,5 +1,5 @@
 name: relay_flutter_example
-description: Example app demonstrating the Relay Flutter SDK
+description: Example app demonstrating the SendRelay Flutter SDK
 publish_to: 'none'
 version: 1.0.0+1
 

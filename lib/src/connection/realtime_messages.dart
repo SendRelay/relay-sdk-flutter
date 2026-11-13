@@ -1,4 +1,4 @@
-/// Messages a Relay realtime client sends. Checked against the shared conformance fixtures
+/// Messages a SendRelay realtime client sends. Checked against the shared conformance fixtures
 /// (packages/sdks/conformance/realtime/outgoing.json).
 abstract final class RealtimeMessages {
   /// Start receiving a task's events.

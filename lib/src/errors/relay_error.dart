@@ -1,4 +1,4 @@
-/// Base error class for all Relay SDK errors
+/// Base error class for all SendRelay SDK errors
 class RelayError implements Exception {
   /// Error message
   final String message;
@@ -6,7 +6,7 @@ class RelayError implements Exception {
   /// Optional underlying cause
   final dynamic cause;
 
-  /// Create a Relay error
+  /// Create a SendRelay error
   const RelayError(this.message, [this.cause]);
 
   @override

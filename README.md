@@ -1,10 +1,10 @@
-# Relay Flutter SDK
+# SendRelay Flutter SDK
 
 [![pub package](https://img.shields.io/pub/v/relay_flutter.svg)](https://pub.dev/packages/relay_flutter)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 **📱 Mobile SDK** | WebSocket Client
 
-Official Flutter SDK for the [Relay](https://sendrelay.com.ng) delivery platform. This is a **client-side mobile SDK** designed for Flutter applications.
+Official Flutter SDK for the [SendRelay](https://sendrelay.com.ng) delivery platform. This is a **client-side mobile SDK** designed for Flutter applications.
 
 > **ℹ️ Client-Side SDK:** This SDK uses WebSocket tokens (not API keys) for secure client authentication. Tokens must be provisioned by your backend using [@relay-sdk/sdk-node](https://www.npmjs.com/package/@relay-sdk/sdk-node) (Server SDK).
 
@@ -104,7 +104,7 @@ import 'package:relay_flutter/relay_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-// 1. Create Relay client
+// 1. Create SendRelay client
 final relay = RelayRealtimeClient(
   getToken: (taskIds) async {
     // Fetch token from your backend
@@ -152,7 +152,7 @@ void dispose() {
 
 The SDK requires a backend endpoint to fetch WebSocket tokens. This ensures your API keys never leave your backend.
 
-Relay checks that a task belongs to **your account**. Only your backend knows which of **your users** may see it, so check that before minting.
+SendRelay checks that a task belongs to **your account**. Only your backend knows which of **your users** may see it, so check that before minting.
 
 ### Example Backend (Node.js/Express)
 
@@ -434,7 +434,7 @@ relay.events.listen((event) {
 
 ```dart
 relay.onConnectionOpen.listen((_) {
-  print('Connected to Relay WebSocket');
+  print('Connected to SendRelay WebSocket');
   setState(() => _connectionStatus = 'Connected');
 });
 
@@ -623,12 +623,12 @@ try {
   await relay.listen('task-123');
 } on ConnectionError catch (e) {
   print('Connection failed: ${e.message}');
-  showErrorDialog('Unable to connect to Relay');
+  showErrorDialog('Unable to connect to SendRelay');
 } on TokenError catch (e) {
   print('Token error: ${e.message}');
   refreshAuthToken();
 } on RelayError catch (e) {
-  print('Relay error: ${e.message}');
+  print('SendRelay error: ${e.message}');
 }
 
 // Or listen to error events
@@ -682,7 +682,7 @@ The main difference is using Dart `Stream<T>` instead of event emitters.
 - [API Reference](https://docs.sendrelay.com.ng/api-reference)
 - [GitHub Repository](https://github.com/SendRelay/relay-sdk-flutter)
 - [Issue Tracker](https://github.com/SendRelay/relay-sdk-flutter/issues)
-- [Relay Dashboard](https://dashboard.sendrelay.com.ng)
+- [SendRelay Dashboard](https://dashboard.sendrelay.com.ng)
 
 ## License
 

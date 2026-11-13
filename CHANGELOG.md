@@ -13,7 +13,7 @@
 
 - Keep looking for a rider and scheduled pickups ([dispatch strategies](https://docs.sendrelay.com.ng/tasks/keep-looking-and-scheduling)).
 - `TaskStatus.scheduled` and `TaskStatus.searching`, and the `TaskDispatchStartedEvent`, `TaskSearchingEvent` and `TaskRidersNearbyEvent` events with their `onTask…` streams.
-- Values this version doesn't know (task status, stage type and status, task type, priority, payment status) parse as a new `unknown` case instead of throwing. Relay will add task statuses for tasks that keep searching for a rider. If you `switch` over these enums exhaustively, add a case for `unknown`.
+- Values this version doesn't know (task status, stage type and status, task type, priority, payment status) parse as a new `unknown` case instead of throwing. SendRelay will add task statuses for tasks that keep searching for a rider. If you `switch` over these enums exhaustively, add a case for `unknown`.
 
 All notable changes to this project will be documented in this file.
 
@@ -41,7 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2025-01-XX
 
 ### Added
-- Initial stable release of Relay Flutter SDK
+- Initial stable release of SendRelay Flutter SDK
 - Real-time task tracking via WebSocket
 - Automatic token provisioning and refresh
 - 19 event types across task lifecycle, payments, and real-time updates

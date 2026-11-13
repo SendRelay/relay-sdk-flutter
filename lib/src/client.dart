@@ -10,7 +10,7 @@ import 'errors/relay_error.dart';
 import 'utils/device_id.dart';
 import 'utils/jwt_decoder.dart';
 
-/// Relay real-time client for Flutter
+/// SendRelay real-time client for Flutter
 ///
 /// Provides real-time task tracking with WebSocket communication,
 /// automatic token provisioning, and subscription management.
@@ -57,7 +57,7 @@ class RelayRealtimeClient {
   final StreamController<RelayEvent> _eventsController =
       StreamController<RelayEvent>.broadcast();
 
-  /// Stream of all Relay events
+  /// Stream of all SendRelay events
   Stream<RelayEvent> get events => _eventsController.stream;
 
   // ============================================================================
@@ -94,7 +94,7 @@ class RelayRealtimeClient {
       .where((event) => event is TaskDetailsUpdatedEvent)
       .cast<TaskDetailsUpdatedEvent>();
 
-  /// Stream of rider cancels that Relay answers by finding another rider (opt-in)
+  /// Stream of rider cancels that SendRelay answers by finding another rider (opt-in)
   Stream<TaskRiderUnassignedEvent> get onTaskRiderUnassigned => events
       .where((event) => event is TaskRiderUnassignedEvent)
       .cast<TaskRiderUnassignedEvent>();
@@ -200,7 +200,7 @@ class RelayRealtimeClient {
       .where((event) => event is TokenExpiringEvent)
       .cast<TokenExpiringEvent>();
 
-  /// Create a Relay real-time client
+  /// Create a SendRelay real-time client
   ///
   /// Required parameters:
   /// - [getToken]: Callback to fetch WebSocket token from your backend

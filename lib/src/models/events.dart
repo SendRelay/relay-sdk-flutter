@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-/// Base event class for all Relay events
+/// Base event class for all SendRelay events
 @immutable
 abstract class RelayEvent {
   /// Timestamp when the event occurred
@@ -11,7 +11,7 @@ abstract class RelayEvent {
   /// revision it delivered for that task, so events arrive in order and once.
   final int? revision;
 
-  /// Create a Relay event
+  /// Create a SendRelay event
   RelayEvent({DateTime? timestamp, this.revision})
       : timestamp = timestamp ?? DateTime.timestamp();
 
@@ -41,7 +41,7 @@ enum TaskType {
   /// Errand
   errand('ERRAND'),
 
-  /// A value this SDK version does not know yet: Relay adds them over time.
+  /// A value this SDK version does not know yet: SendRelay adds them over time.
   unknown('UNKNOWN');
 
   /// String value
@@ -56,7 +56,7 @@ enum TaskType {
 
 /// Task status enumeration
 enum TaskStatus {
-  /// Booked for a pickup time (dispatch SCHEDULED); Relay has not started looking yet
+  /// Booked for a pickup time (dispatch SCHEDULED); SendRelay has not started looking yet
   scheduled('SCHEDULED'),
 
   /// Pending assignment
@@ -86,7 +86,7 @@ enum TaskStatus {
   /// Payment failed
   paymentFailed('PAYMENT_FAILED'),
 
-  /// A value this SDK version does not know yet: Relay adds them over time.
+  /// A value this SDK version does not know yet: SendRelay adds them over time.
   unknown('UNKNOWN');
 
   /// String value
@@ -107,7 +107,7 @@ enum Priority {
   /// Urgent priority
   urgent('URGENT'),
 
-  /// A value this SDK version does not know yet: Relay adds them over time.
+  /// A value this SDK version does not know yet: SendRelay adds them over time.
   unknown('UNKNOWN');
 
   /// String value
@@ -128,7 +128,7 @@ enum StageType {
   /// Dropoff stage
   dropoff('DROPOFF'),
 
-  /// A value this SDK version does not know yet: Relay adds them over time.
+  /// A value this SDK version does not know yet: SendRelay adds them over time.
   unknown('UNKNOWN');
 
   /// String value
@@ -152,7 +152,7 @@ enum StageStatus {
   /// Completed
   completed('COMPLETED'),
 
-  /// A value this SDK version does not know yet: Relay adds them over time.
+  /// A value this SDK version does not know yet: SendRelay adds them over time.
   unknown('UNKNOWN');
 
   /// String value
@@ -322,7 +322,7 @@ class TaskCreatedEvent extends RelayEvent {
   String toString() => 'TaskCreatedEvent(taskId: $taskId, status: CREATED)';
 }
 
-/// A booked task's search opened: Relay is now looking for a rider
+/// A booked task's search opened: SendRelay is now looking for a rider
 @immutable
 class TaskDispatchStartedEvent extends RelayEvent {
   /// Task ID
@@ -337,7 +337,7 @@ class TaskDispatchStartedEvent extends RelayEvent {
   /// When the rider should reach the pickup
   final DateTime pickupAt;
 
-  /// When Relay stops looking
+  /// When SendRelay stops looking
   final DateTime searchExpiresAt;
 
   /// When the search opened
@@ -374,7 +374,7 @@ class TaskSearchingEvent extends RelayEvent {
   /// WAIT_FOR_RIDER or SCHEDULED (or a newer strategy, as its raw value)
   final String strategy;
 
-  /// When Relay stops looking
+  /// When SendRelay stops looking
   final DateTime searchExpiresAt;
 
   /// When the task started searching
@@ -444,7 +444,7 @@ class TaskDetailsUpdatedEvent extends RelayEvent {
   String toString() => 'TaskDetailsUpdatedEvent(taskId: $taskId, changed: $changed)';
 }
 
-/// Opt-in (`onRiderCancel: FIND_ANOTHER`): the rider cancelled before pickup and Relay is
+/// Opt-in (`onRiderCancel: FIND_ANOTHER`): the rider cancelled before pickup and SendRelay is
 /// finding another. The task is PENDING again.
 @immutable
 class TaskRiderUnassignedEvent extends RelayEvent {
@@ -821,7 +821,7 @@ enum PaymentStatus {
   /// Dispute resolved
   disputeResolved('DISPUTE_RESOLVED'),
 
-  /// A value this SDK version does not know yet: Relay adds them over time.
+  /// A value this SDK version does not know yet: SendRelay adds them over time.
   unknown('UNKNOWN');
 
   /// String value

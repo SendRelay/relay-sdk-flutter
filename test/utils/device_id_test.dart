@@ -3,7 +3,7 @@ import 'package:relay_flutter/src/utils/device_id.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  group('Relay deviceId persistence', () {
+  group('SendRelay deviceId persistence', () {
     setUp(() {
       SharedPreferences.setMockInitialValues({});
     });

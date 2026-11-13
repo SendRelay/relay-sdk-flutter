@@ -1,6 +1,6 @@
-# Relay Flutter SDK Example
+# SendRelay Flutter SDK Example
 
-Example Flutter application demonstrating the Relay Flutter SDK.
+Example Flutter application demonstrating the SendRelay Flutter SDK.
 
 ## Features
 
@@ -39,7 +39,7 @@ flutter run
 
 ## Backend Setup
 
-You need a backend endpoint that fetches WebSocket tokens from the Relay API.
+You need a backend endpoint that fetches WebSocket tokens from the SendRelay API.
 
 ### Example (Node.js)
 
@@ -77,5 +77,5 @@ app.post('/api/relay/token', async (req, res) => {
 
 ## Learn More
 
-- [Relay Flutter SDK Documentation](../README.md)
-- [Relay API Documentation](https://docs.sendrelay.com.ng)
+- [SendRelay Flutter SDK Documentation](../README.md)
+- [SendRelay API Documentation](https://docs.sendrelay.com.ng)

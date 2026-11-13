@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Relay Flutter SDK Example',
+      title: 'SendRelay Flutter SDK Example',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
@@ -49,7 +49,7 @@ class _TaskTrackerScreenState extends State<TaskTrackerScreen> {
   void initState() {
     super.initState();
 
-    // Initialize Relay client
+    // Initialize SendRelay client
     _relay = RelayRealtimeClient(
       getToken: _fetchTokenFromBackend,
       autoRefresh: true,
@@ -131,14 +131,14 @@ class _TaskTrackerScreenState extends State<TaskTrackerScreen> {
       setState(() {
         _connectionState = ConnectionState.connected;
       });
-      _showSnackBar('Connected to Relay', isSuccess: true);
+      _showSnackBar('Connected to SendRelay', isSuccess: true);
     });
 
     _relay.onConnectionClose.listen((_) {
       setState(() {
         _connectionState = ConnectionState.disconnected;
       });
-      _showSnackBar('Disconnected from Relay');
+      _showSnackBar('Disconnected from SendRelay');
     });
 
     _relay.onConnectionReconnecting.listen((event) {
@@ -221,7 +221,7 @@ class _TaskTrackerScreenState extends State<TaskTrackerScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Relay Flutter SDK Example'),
+        title: const Text('SendRelay Flutter SDK Example'),
         actions: [
           _buildConnectionStatusChip(),
           const SizedBox(width: 16),

@@ -57,7 +57,7 @@ class HeartbeatConfig {
       'timeout: ${timeout.inSeconds}s)';
 }
 
-/// Relay real-time client configuration
+/// SendRelay real-time client configuration
 class RelayRealtimeClientOptions {
   /// Callback to fetch WebSocket token from backend
   ///
@@ -103,7 +103,7 @@ class RelayRealtimeClientOptions {
   /// Optional logger for debugging
   final Logger? logger;
 
-  /// Create Relay real-time client options
+  /// Create SendRelay real-time client options
   RelayRealtimeClientOptions({
     required this.getToken,
     String? url,
