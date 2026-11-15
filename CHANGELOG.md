@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.12.0 — 2026-11-15
+
+- Pooled delivery: `TaskPoolingGroupedEvent` (final price, `sharedWith`, planned times) and `TaskPoolingSoloEvent`, and `RiderLocationUpdateEvent.stopsBefore`: how many stops the rider makes before this delivery's next one. A pooled delivery's `eta` comes only when its own stop is next. `TaskType.pooledDelivery`. See [pooled delivery](https://docs.sendrelay.com.ng/concepts/pooled-delivery).
+
 ## 1.11.0 — 2026-11-14
 
 - Version aligned with the app SDKs. Motorcycles are always `MOTORCYCLE`; the API no longer uses `BIKE`. No code change.

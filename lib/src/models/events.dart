@@ -35,7 +35,10 @@ enum TaskType {
   /// Package delivery
   packageDelivery('PACKAGE_DELIVERY'),
 
-  /// Bulk delivery
+  /// Pooled delivery: goes out in a wave on set days of the week, shared with deliveries going the same way
+  pooledDelivery('POOLED_DELIVERY'),
+
+  /// Renamed [pooledDelivery]; older tasks keep it
   bulkDelivery('BULK_DELIVERY'),
 
   /// Errand
@@ -468,6 +471,90 @@ class TaskRiderUnassignedEvent extends RelayEvent {
 
   @override
   String toString() => 'TaskRiderUnassignedEvent(taskId: $taskId, riderId: $riderId)';
+}
+
+/// Pooled delivery: the rider started the shared route. Comes after [TaskAssignedEvent], with the
+/// final price (never above [maxTotal]) and the planned times.
+@immutable
+class TaskPoolingGroupedEvent extends RelayEvent {
+  final String taskId;
+  final String developerId;
+  final TaskStatus status;
+
+  /// The wave, for example `MIDDAY`
+  final String wave;
+
+  /// The wave's date (YYYY-MM-DD, Lagos)
+  final String date;
+
+  /// How many other deliveries share the route (never who they are)
+  final int sharedWith;
+
+  /// Most it could cost, in kobo
+  final int maxTotal;
+
+  /// What it costs, in kobo
+  final int finalTotal;
+  final DateTime? plannedPickupAt;
+  final DateTime? plannedDeliveryAt;
+  final DateTime groupedAt;
+
+  TaskPoolingGroupedEvent({
+    required this.taskId,
+    required this.developerId,
+    required this.status,
+    required this.wave,
+    required this.date,
+    required this.sharedWith,
+    required this.maxTotal,
+    required this.finalTotal,
+    this.plannedPickupAt,
+    this.plannedDeliveryAt,
+    required this.groupedAt,
+    super.timestamp,
+    super.revision,
+  });
+
+  @override
+  String toString() => 'TaskPoolingGroupedEvent(taskId: $taskId, finalTotal: $finalTotal)';
+}
+
+/// Pooled delivery: it goes on its own at its maximum price, through ordinary dispatch in its
+/// pickup window. The usual dispatch events follow.
+@immutable
+class TaskPoolingSoloEvent extends RelayEvent {
+  final String taskId;
+  final String developerId;
+  final TaskStatus status;
+  final String wave;
+  final String date;
+
+  /// NO_ROUTE, ROUTE_NOT_TAKEN or PLANNING_FAILED (or a newer reason as its raw string)
+  final String reason;
+
+  /// What it costs, in kobo
+  final int maxTotal;
+  final DateTime pickupAt;
+  final DateTime searchExpiresAt;
+  final DateTime soloAt;
+
+  TaskPoolingSoloEvent({
+    required this.taskId,
+    required this.developerId,
+    required this.status,
+    required this.wave,
+    required this.date,
+    required this.reason,
+    required this.maxTotal,
+    required this.pickupAt,
+    required this.searchExpiresAt,
+    required this.soloAt,
+    super.timestamp,
+    super.revision,
+  });
+
+  @override
+  String toString() => 'TaskPoolingSoloEvent(taskId: $taskId, reason: $reason)';
 }
 
 /// A manual task (autoAssign false) that is waiting has eligible riders near its pickup. A count
@@ -1050,12 +1137,17 @@ class RiderLocationUpdateEvent extends RelayEvent {
   /// route and live traffic. Null when the rider's app hasn't reported one.
   final RiderRouteEta? eta;
 
+  /// Pooled delivery: stops the rider makes before this delivery's next one; 0 when it is next
+  /// (the update then has an [eta]). Null on every other task.
+  final int? stopsBefore;
+
   /// Create rider location update event
   RiderLocationUpdateEvent({
     required this.riderId,
     required this.taskId,
     required this.location,
     this.eta,
+    this.stopsBefore,
     super.timestamp,
     super.revision,
   });

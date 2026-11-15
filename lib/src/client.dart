@@ -99,6 +99,16 @@ class RelayRealtimeClient {
       .where((event) => event is TaskRiderUnassignedEvent)
       .cast<TaskRiderUnassignedEvent>();
 
+  /// Stream of pooled deliveries grouped onto a route, with the final price
+  Stream<TaskPoolingGroupedEvent> get onTaskPoolingGrouped => events
+      .where((event) => event is TaskPoolingGroupedEvent)
+      .cast<TaskPoolingGroupedEvent>();
+
+  /// Stream of pooled deliveries that go alone at their maximum price
+  Stream<TaskPoolingSoloEvent> get onTaskPoolingSolo => events
+      .where((event) => event is TaskPoolingSoloEvent)
+      .cast<TaskPoolingSoloEvent>();
+
   /// Stream of task offered events
   Stream<TaskOfferedEvent> get onTaskOffered => events
       .where((event) => event is TaskOfferedEvent)
@@ -570,6 +580,41 @@ class RelayRealtimeClient {
             researchesLeft: _asInt(payload['researchesLeft']),
           ));
           break;
+        case 'TASK_POOLING_GROUPED':
+          final window = _asMap(payload['window']) ?? <String, dynamic>{};
+          final plannedPickupAt = payload['plannedPickupAt'];
+          final plannedDeliveryAt = payload['plannedDeliveryAt'];
+          _eventsController.add(TaskPoolingGroupedEvent(
+            revision: _revisionOf(payload),
+            taskId: payload['taskId'] as String,
+            developerId: payload['developerId'] as String? ?? '',
+            status: _parseTaskStatus(payload['status'] as String? ?? 'ASSIGNED'),
+            wave: window['wave'] as String? ?? '',
+            date: window['date'] as String? ?? '',
+            sharedWith: _asInt(payload['sharedWith']),
+            maxTotal: _asInt(payload['maxTotal']),
+            finalTotal: _asInt(payload['finalTotal']),
+            plannedPickupAt: plannedPickupAt == null ? null : _parseDateTime(plannedPickupAt),
+            plannedDeliveryAt: plannedDeliveryAt == null ? null : _parseDateTime(plannedDeliveryAt),
+            groupedAt: _parseDateTime(payload['groupedAt']),
+          ));
+          break;
+        case 'TASK_POOLING_SOLO':
+          final window = _asMap(payload['window']) ?? <String, dynamic>{};
+          _eventsController.add(TaskPoolingSoloEvent(
+            revision: _revisionOf(payload),
+            taskId: payload['taskId'] as String,
+            developerId: payload['developerId'] as String? ?? '',
+            status: _parseTaskStatus(payload['status'] as String? ?? 'SCHEDULED'),
+            wave: window['wave'] as String? ?? '',
+            date: window['date'] as String? ?? '',
+            reason: payload['reason'] as String? ?? '',
+            maxTotal: _asInt(payload['maxTotal']),
+            pickupAt: _parseDateTime(payload['pickupAt']),
+            searchExpiresAt: _parseDateTime(payload['searchExpiresAt']),
+            soloAt: _parseDateTime(payload['soloAt']),
+          ));
+          break;
         case 'TASK_OFFERED':
           _emitTaskOfferedEvent(payload);
           break;
@@ -835,6 +880,7 @@ class RelayRealtimeClient {
       taskId: data['taskId'] as String,
       location: Location.fromJson(data['location'] as Map<String, dynamic>),
       eta: RiderRouteEta.tryParse(data['eta']),
+      stopsBefore: data['stopsBefore'] is num ? (data['stopsBefore'] as num).toInt() : null,
       // When the rider reported this; `eta` counts down from here, not from arrival.
       timestamp: DateTime.tryParse(data['timestamp']?.toString() ?? ''),
     );

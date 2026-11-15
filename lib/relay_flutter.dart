@@ -277,6 +277,8 @@ export 'src/models/events.dart'
         StageArrivedEvent,
         TaskDetailsUpdatedEvent,
         TaskRiderUnassignedEvent,
+        TaskPoolingGroupedEvent,
+        TaskPoolingSoloEvent,
         TaskRidersNearbyEvent,
         TaskOfferedEvent,
         TaskAssignedEvent,
