@@ -424,6 +424,127 @@ class StageArrivedEvent extends RelayEvent {
   String toString() => 'StageArrivedEvent(taskId: $taskId, stageIndex: $stageIndex)';
 }
 
+/// Errands: a work stage could not be done or was skipped, and the rider goes on to
+/// [nextStageIndex]. A task with failed stages can still end COMPLETED.
+@immutable
+class StageFailedEvent extends RelayEvent {
+  final String taskId;
+  final String? riderId;
+  final int stageIndex;
+
+  /// The stage's type as the API sends it: PURCHASE, PAYMENT, QUEUE, INSPECTION, CUSTOM, or a
+  /// drop-off left with nothing to deliver
+  final String stageType;
+  final String? stageReference;
+
+  /// FAILED or SKIPPED
+  final String stageStatus;
+
+  /// OUT_OF_STOCK, CLOSED, REFUSED, NOT_READY, PAYMENT_FAILED or OTHER; SKIPPED_BY_YOU,
+  /// NOTHING_TO_DELIVER, DECLINED or TASK_ENDED (or a newer reason as its raw string)
+  final String reason;
+  final String? note;
+  final DateTime endedAt;
+  final int? nextStageIndex;
+  final int totalStages;
+
+  StageFailedEvent({
+    required this.taskId,
+    required this.riderId,
+    required this.stageIndex,
+    required this.stageType,
+    required this.stageReference,
+    required this.stageStatus,
+    required this.reason,
+    required this.note,
+    required this.endedAt,
+    required this.nextStageIndex,
+    required this.totalStages,
+    super.timestamp,
+    super.revision,
+  });
+
+  @override
+  String toString() =>
+      'StageFailedEvent(taskId: $taskId, stageIndex: $stageIndex, reason: $reason)';
+}
+
+/// Errands: a question from the rider, as the rider sees it.
+@immutable
+class ErrandApproval {
+  final String id;
+  final int stageIndex;
+
+  /// SUBSTITUTE, PRICE_ABOVE_MAX, OVER_SPEND_LIMIT, MORE_TIME or QUESTION
+  final String kind;
+
+  /// PENDING, APPROVED, DECLINED or EXPIRED
+  final String status;
+  final String question;
+  final Map<String, dynamic> proposal;
+  final String? photo;
+  final DateTime expiresAt;
+  final String? note;
+  final DateTime? decidedAt;
+
+  const ErrandApproval({
+    required this.id,
+    required this.stageIndex,
+    required this.kind,
+    required this.status,
+    required this.question,
+    required this.proposal,
+    required this.photo,
+    required this.expiresAt,
+    required this.note,
+    required this.decidedAt,
+  });
+}
+
+/// Errands: the rider asked a question and waits until [approval]'s `expiresAt` for the answer.
+@immutable
+class ApprovalRequestedEvent extends RelayEvent {
+  final String taskId;
+  final String riderId;
+  final int stageIndex;
+  final ErrandApproval approval;
+
+  ApprovalRequestedEvent({
+    required this.taskId,
+    required this.riderId,
+    required this.stageIndex,
+    required this.approval,
+    super.timestamp,
+    super.revision,
+  });
+
+  @override
+  String toString() =>
+      'ApprovalRequestedEvent(taskId: $taskId, approval: ${approval.id})';
+}
+
+/// Errands: the rider's question was approved, declined or expired.
+@immutable
+class ApprovalResolvedEvent extends RelayEvent {
+  final String taskId;
+  final String riderId;
+  final int stageIndex;
+  final ErrandApproval approval;
+
+  ApprovalResolvedEvent({
+    required this.taskId,
+    required this.riderId,
+    required this.stageIndex,
+    required this.approval,
+    super.timestamp,
+    super.revision,
+  });
+
+  @override
+  String toString() =>
+      'ApprovalResolvedEvent(taskId: $taskId, approval: ${approval.id}, status: ${approval.status})';
+}
+
 /// The business edited notes, instructions or a stop's contact. Read the task for the new values.
 @immutable
 class TaskDetailsUpdatedEvent extends RelayEvent {

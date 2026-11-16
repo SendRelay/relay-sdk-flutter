@@ -97,6 +97,78 @@ void main() {
       expect(completed.completionCodeVerified, isTrue);
     });
 
+    test('parses errand frames: a failed stage and the rider\'s question',
+        () async {
+      final client = RelayRealtimeClient(getToken: (_) async => 'token');
+      final seen = <RelayEvent>[];
+      final sub = client.events.listen(seen.add);
+      client.handleIncomingMessageForTest({
+        'type': 'STAGE_FAILED',
+        'revision': 7,
+        'taskId': 'task-1',
+        'developerId': 'dev-1',
+        'riderId': 'rider-1',
+        'stageIndex': 0,
+        'stage': {
+          'type': 'QUEUE',
+          'reference': null,
+          'status': 'FAILED',
+          'reason': 'CLOSED',
+          'note': null,
+          'endedAt': '2026-11-16T10:10:00.000Z'
+        },
+        'nextStageIndex': 1,
+        'totalStages': 3,
+      });
+      final approval = {
+        'id': 'apr_1',
+        'stageIndex': 1,
+        'kind': 'SUBSTITUTE',
+        'status': 'PENDING',
+        'question': 'Swap the 400 g tin for the 1 kg pack?',
+        'proposal': {'substitute': 'Peak milk 1kg'},
+        'photo': null,
+        'expiresAt': '2026-11-16T10:20:00.000Z',
+        'note': null,
+        'decidedAt': null,
+      };
+      client.handleIncomingMessageForTest({
+        'type': 'APPROVAL_REQUESTED',
+        'revision': 8,
+        'taskId': 'task-1',
+        'riderId': 'rider-1',
+        'stageIndex': 1,
+        'approval': approval
+      });
+      client.handleIncomingMessageForTest({
+        'type': 'APPROVAL_RESOLVED',
+        'revision': 9,
+        'taskId': 'task-1',
+        'riderId': 'rider-1',
+        'stageIndex': 1,
+        'approval': {
+          ...approval,
+          'status': 'APPROVED',
+          'decidedAt': '2026-11-16T10:12:00.000Z'
+        },
+      });
+      await Future<void>.delayed(Duration.zero);
+      await sub.cancel();
+
+      final failed = seen.whereType<StageFailedEvent>().single;
+      expect(failed.stageType, 'QUEUE');
+      expect(failed.reason, 'CLOSED');
+      expect(failed.nextStageIndex, 1);
+      expect(failed.revision, 7);
+      final asked = seen.whereType<ApprovalRequestedEvent>().single;
+      expect(asked.approval.kind, 'SUBSTITUTE');
+      expect(asked.approval.proposal['substitute'], 'Peak milk 1kg');
+      final resolved = seen.whereType<ApprovalResolvedEvent>().single;
+      expect(resolved.approval.status, 'APPROVED');
+      expect(resolved.approval.decidedAt,
+          DateTime.parse('2026-11-16T10:12:00.000Z'));
+    });
+
     test('parses the rider ETA on location updates, and tolerates it missing', () async {
       final client = RelayRealtimeClient(
         getToken: (_) async => 'token',

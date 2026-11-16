@@ -68,6 +68,22 @@ Map<String, dynamic> _asApiJson(RelayEvent event) => switch (event) {
           'reason': e.reason,
           'maxTotal': e.maxTotal,
         },
+      StageFailedEvent e => {
+          'taskId': e.taskId,
+          'stageIndex': e.stageIndex,
+          'stage': {'type': e.stageType, 'reference': e.stageReference, 'status': e.stageStatus, 'reason': e.reason},
+          'nextStageIndex': e.nextStageIndex,
+        },
+      ApprovalRequestedEvent e => {
+          'taskId': e.taskId,
+          'stageIndex': e.stageIndex,
+          'approval': {'id': e.approval.id, 'kind': e.approval.kind, 'status': e.approval.status},
+        },
+      ApprovalResolvedEvent e => {
+          'taskId': e.taskId,
+          'stageIndex': e.stageIndex,
+          'approval': {'id': e.approval.id, 'kind': e.approval.kind, 'status': e.approval.status},
+        },
       TaskAssignedEvent e => {
           'taskId': e.taskId,
           'status': e.status.value,
@@ -131,6 +147,9 @@ String? _eventName(RelayEvent event) => switch (event) {
       TaskRiderUnassignedEvent() => 'TASK_RIDER_UNASSIGNED',
       TaskPoolingGroupedEvent() => 'TASK_POOLING_GROUPED',
       TaskPoolingSoloEvent() => 'TASK_POOLING_SOLO',
+      StageFailedEvent() => 'STAGE_FAILED',
+      ApprovalRequestedEvent() => 'APPROVAL_REQUESTED',
+      ApprovalResolvedEvent() => 'APPROVAL_RESOLVED',
       TaskAssignedEvent() => 'TASK_ASSIGNED',
       TaskInProgressEvent() => 'TASK_IN_PROGRESS',
       StageCompletedEvent() => 'STAGE_COMPLETED',

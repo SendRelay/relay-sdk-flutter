@@ -109,6 +109,21 @@ class RelayRealtimeClient {
       .where((event) => event is TaskPoolingSoloEvent)
       .cast<TaskPoolingSoloEvent>();
 
+  /// Stream of errand stops that did not get done (failed or skipped)
+  Stream<StageFailedEvent> get onStageFailed => events
+      .where((event) => event is StageFailedEvent)
+      .cast<StageFailedEvent>();
+
+  /// Stream of questions the rider asks on an errand
+  Stream<ApprovalRequestedEvent> get onApprovalRequested => events
+      .where((event) => event is ApprovalRequestedEvent)
+      .cast<ApprovalRequestedEvent>();
+
+  /// Stream of errand questions answered, declined or timed out
+  Stream<ApprovalResolvedEvent> get onApprovalResolved => events
+      .where((event) => event is ApprovalResolvedEvent)
+      .cast<ApprovalResolvedEvent>();
+
   /// Stream of task offered events
   Stream<TaskOfferedEvent> get onTaskOffered => events
       .where((event) => event is TaskOfferedEvent)
@@ -560,6 +575,44 @@ class RelayRealtimeClient {
             stageIndex: _asInt(payload['stageIndex']),
             stageType: payload['stageType'] as String? ?? '',
             arrivedAt: _parseDateTime(payload['arrivedAt']),
+          ));
+          break;
+        case 'STAGE_FAILED':
+          final stage = _asMap(payload['stage']) ?? <String, dynamic>{};
+          final next = payload['nextStageIndex'];
+          _eventsController.add(StageFailedEvent(
+            revision: _revisionOf(payload),
+            taskId: payload['taskId'] as String,
+            riderId: payload['riderId'] as String?,
+            stageIndex: _asInt(payload['stageIndex']),
+            stageType: stage['type'] as String? ?? '',
+            stageReference: stage['reference'] as String?,
+            stageStatus: stage['status'] as String? ?? 'FAILED',
+            reason: stage['reason'] as String? ?? '',
+            note: stage['note'] as String?,
+            endedAt: _parseDateTime(stage['endedAt'] ?? payload['timestamp']),
+            nextStageIndex: next == null ? null : _asInt(next),
+            totalStages: _asInt(payload['totalStages']),
+          ));
+          break;
+        case 'APPROVAL_REQUESTED':
+          _eventsController.add(ApprovalRequestedEvent(
+            revision: _revisionOf(payload),
+            taskId: payload['taskId'] as String,
+            riderId: payload['riderId'] as String? ?? '',
+            stageIndex: _asInt(payload['stageIndex']),
+            approval: _parseApproval(
+                _asMap(payload['approval']) ?? <String, dynamic>{}),
+          ));
+          break;
+        case 'APPROVAL_RESOLVED':
+          _eventsController.add(ApprovalResolvedEvent(
+            revision: _revisionOf(payload),
+            taskId: payload['taskId'] as String,
+            riderId: payload['riderId'] as String? ?? '',
+            stageIndex: _asInt(payload['stageIndex']),
+            approval: _parseApproval(
+                _asMap(payload['approval']) ?? <String, dynamic>{}),
           ));
           break;
         case 'TASK_DETAILS_UPDATED':
@@ -1066,6 +1119,22 @@ class RelayRealtimeClient {
 
   int _asInt(dynamic value) {
     return (value as num).toInt();
+  }
+
+  ErrandApproval _parseApproval(Map<String, dynamic> data) {
+    final decidedAt = data['decidedAt'];
+    return ErrandApproval(
+      id: data['id'] as String? ?? '',
+      stageIndex: _asInt(data['stageIndex']),
+      kind: data['kind'] as String? ?? '',
+      status: data['status'] as String? ?? '',
+      question: data['question'] as String? ?? '',
+      proposal: _asMap(data['proposal']) ?? <String, dynamic>{},
+      photo: data['photo'] as String?,
+      expiresAt: _parseDateTime(data['expiresAt']),
+      note: data['note'] as String?,
+      decidedAt: decidedAt == null ? null : _parseDateTime(decidedAt),
+    );
   }
 
   DateTime _parseDateTime(dynamic value) {
